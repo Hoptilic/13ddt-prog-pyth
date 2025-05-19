@@ -1,5 +1,5 @@
-import tkinter as tk
-from tkinter import messagebox
+from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox
+import sys
 import os
 from socketing.login import Login
 from socketing.cookie import CookieManager
@@ -38,42 +38,54 @@ def clear_session():
     if os.path.exists(SESSION_FILE):
         os.remove(SESSION_FILE)
 
-class LoginApp:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Login GUI")
+class LoginApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Login GUI")
         self.login = Login()
         self.users = load_users()
         self.cookie_manager = CookieManager()
         self.cookie_manager.createJar()
         self.current_cookie = None
         self.current_user = None
-
-        self.frame = tk.Frame(root)
-        self.frame.pack(padx=10, pady=10)
-
-        tk.Label(self.frame, text="Username:").grid(row=0, column=0)
-        self.username_entry = tk.Entry(self.frame)
-        self.username_entry.grid(row=0, column=1)
-
-        tk.Label(self.frame, text="Password:").grid(row=1, column=0)
-        self.password_entry = tk.Entry(self.frame, show="*")
-        self.password_entry.grid(row=1, column=1)
-
-        self.login_btn = tk.Button(self.frame, text="Login", command=self.login_user)
-        self.login_btn.grid(row=2, column=0, pady=5)
-
-        self.register_btn = tk.Button(self.frame, text="Register", command=self.register_user)
-        self.register_btn.grid(row=2, column=1, pady=5)
-
-        self.logout_btn = tk.Button(self.frame, text="Logout", command=self.logout_user, state=tk.DISABLED)
-        self.logout_btn.grid(row=3, column=0, columnspan=2, pady=5)
-
-        self.status_label = tk.Label(self.frame, text="Not logged in.")
-        self.status_label.grid(row=4, column=0, columnspan=2)
-
-        # Try auto-login with cookie/session
+        self.init_ui()
         self.auto_login_with_cookie()
+
+    def init_ui(self):
+        layout = QVBoxLayout()
+        user_layout = QHBoxLayout()
+        pass_layout = QHBoxLayout()
+        btn_layout = QHBoxLayout()
+
+        self.username_label = QLabel("Username:")
+        self.username_entry = QLineEdit()
+        user_layout.addWidget(self.username_label)
+        user_layout.addWidget(self.username_entry)
+
+        self.password_label = QLabel("Password:")
+        self.password_entry = QLineEdit()
+        self.password_entry.setEchoMode(QLineEdit.EchoMode.Password)
+        pass_layout.addWidget(self.password_label)
+        pass_layout.addWidget(self.password_entry)
+
+        self.login_btn = QPushButton("Login")
+        self.login_btn.clicked.connect(self.login_user)
+        self.register_btn = QPushButton("Register")
+        self.register_btn.clicked.connect(self.register_user)
+        self.logout_btn = QPushButton("Logout")
+        self.logout_btn.clicked.connect(self.logout_user)
+        self.logout_btn.setEnabled(False)
+        btn_layout.addWidget(self.login_btn)
+        btn_layout.addWidget(self.register_btn)
+        btn_layout.addWidget(self.logout_btn)
+
+        self.status_label = QLabel("Not logged in.")
+
+        layout.addLayout(user_layout)
+        layout.addLayout(pass_layout)
+        layout.addLayout(btn_layout)
+        layout.addWidget(self.status_label)
+        self.setLayout(layout)
 
     def auto_login_with_cookie(self):
         username, cookie = load_session()
@@ -83,53 +95,52 @@ class LoginApp:
             if self.cookie_manager.checkCookie(cookie):
                 self.current_user = username
                 self.current_cookie = cookie
-                self.status_label.config(text=f"Logged in as {username}\nSession: {cookie}")
-                self.logout_btn.config(state=tk.NORMAL)
-                self.login_btn.config(state=tk.DISABLED)
-                self.register_btn.config(state=tk.DISABLED)
-                messagebox.showinfo("Welcome back", f"Auto-logged in as {username}!")
+                self.status_label.setText(f"Logged in as {username}\nSession: {cookie}")
+                self.logout_btn.setEnabled(True)
+                self.login_btn.setEnabled(False)
+                self.register_btn.setEnabled(False)
+                QMessageBox.information(self, "Welcome back", f"Auto-logged in as {username}!")
             else:
                 print(f"[DEBUG] Cookie {cookie} not found or invalid.")
         else:
             print("[DEBUG] No session file or session data found.")
 
     def login_user(self):
-        username = self.username_entry.get()
-        password = self.password_entry.get()
+        username = self.username_entry.text()
+        password = self.password_entry.text()
         if username in self.users:
             salt, key = self.users[username]
             try:
                 if self.login.unencrypt(password, salt, key):
-                    # Session/cookie management
                     self.current_cookie = self.cookie_manager.bake()
                     self.current_user = username
                     save_session(username, self.current_cookie)
-                    self.status_label.config(text=f"Logged in as {username}\nSession: {self.current_cookie}")
-                    self.logout_btn.config(state=tk.NORMAL)
-                    self.login_btn.config(state=tk.DISABLED)
-                    self.register_btn.config(state=tk.DISABLED)
-                    messagebox.showinfo("Success", "Login successful! Session started.")
+                    self.status_label.setText(f"Logged in as {username}\nSession: {self.current_cookie}")
+                    self.logout_btn.setEnabled(True)
+                    self.login_btn.setEnabled(False)
+                    self.register_btn.setEnabled(False)
+                    QMessageBox.information(self, "Success", "Login successful! Session started.")
                 else:
-                    messagebox.showerror("Error", "Incorrect password.")
+                    QMessageBox.critical(self, "Error", "Incorrect password.")
             except Exception as e:
-                messagebox.showerror("Error", str(e))
+                QMessageBox.critical(self, "Error", str(e))
         else:
-            messagebox.showerror("Error", "User not found.")
+            QMessageBox.critical(self, "Error", "User not found.")
 
     def register_user(self):
-        username = self.username_entry.get()
-        password = self.password_entry.get()
+        username = self.username_entry.text()
+        password = self.password_entry.text()
         if username in self.users:
-            messagebox.showerror("Error", "User already exists.")
+            QMessageBox.critical(self, "Error", "User already exists.")
             return
         try:
             if self.login.validate(password):
                 salt, key = self.login.encrypt(password)
                 save_user(username, salt, key)
                 self.users = load_users()
-                messagebox.showinfo("Success", "User registered!")
+                QMessageBox.information(self, "Success", "User registered!")
         except Exception as e:
-            messagebox.showerror("Error", str(e))
+            QMessageBox.critical(self, "Error", str(e))
 
     def logout_user(self):
         if self.current_cookie:
@@ -137,13 +148,14 @@ class LoginApp:
             clear_session()
             self.current_cookie = None
             self.current_user = None
-            self.status_label.config(text="Not logged in.")
-            self.logout_btn.config(state=tk.DISABLED)
-            self.login_btn.config(state=tk.NORMAL)
-            self.register_btn.config(state=tk.NORMAL)
-            messagebox.showinfo("Logged out", "Session ended and cookie removed.")
+            self.status_label.setText("Not logged in.")
+            self.logout_btn.setEnabled(False)
+            self.login_btn.setEnabled(True)
+            self.register_btn.setEnabled(True)
+            QMessageBox.information(self, "Logged out", "Session ended and cookie removed.")
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = LoginApp(root)
-    root.mainloop()
+
+app = QApplication(sys.argv)
+window = LoginApp()
+window.show()
+sys.exit(app.exec())
