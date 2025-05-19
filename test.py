@@ -1,3 +1,4 @@
+import socketing.cookie
 import socketing.login
 import os
 
@@ -12,7 +13,7 @@ def test_login():
     print("Login tests passed!")
 
 def test_cookie_manager():
-    cm = socketing.login.CookieManager()
+    cm = socketing.cookie.CookieManager()
     cm.initCookieStorage()
     # Test cookie creation
     cookie_id = cm.createCookie()
@@ -38,7 +39,7 @@ def test_cookie_manager():
 
 def test_grant_cookie():
     login = socketing.login.Login()
-    cm = socketing.login.CookieManager()
+    cm = socketing.cookie.CookieManager()
     cm.initCookieStorage()
     cookie_id = cm.createCookie()
     # Patch Login to use our CookieManager instance
