@@ -3,9 +3,9 @@ import sys
 import os
 from socketing.login import Login
 from socketing.cookie import CookieManager
+from socketing.session import SessionFileManager
 
 USER_FILE = "users.txt"
-SESSION_FILE = "session.txt"
 
 def save_user(username, salt, key):
     with open(USER_FILE, "a") as f:
@@ -21,22 +21,7 @@ def load_users():
                     users[parts[0]] = (parts[1], parts[2])
     return users
 
-def save_session(username, cookie):
-    with open(SESSION_FILE, "w") as f:
-        f.write(f"{username}:{cookie}")
-
-def load_session():
-    if os.path.exists(SESSION_FILE):
-        with open(SESSION_FILE, "r") as f:
-            line = f.read().strip()
-            if ":" in line:
-                username, cookie = line.split(":", 1)
-                return username, cookie
-    return None, None
-
-def clear_session():
-    if os.path.exists(SESSION_FILE):
-        os.remove(SESSION_FILE)
+session_manager = SessionFileManager()
 
 class LoginApp(QWidget):
     def __init__(self):
@@ -48,6 +33,7 @@ class LoginApp(QWidget):
         self.cookie_manager.createJar()
         self.current_cookie = None
         self.current_user = None
+        self.session_manager = session_manager
         self.init_ui()
         self.auto_login_with_cookie()
 
@@ -87,7 +73,8 @@ class LoginApp(QWidget):
         self.setLayout(layout)
 
     def auto_login_with_cookie(self):
-        username, cookie = load_session()
+        username = self.session_manager.current_user
+        cookie = self.session_manager.current_cookie
         if username and cookie:
             print(f"[DEBUG] Attempting auto-login with username={username}, cookie={cookie}")
             print(f"[DEBUG] Current cookies: {self.cookie_manager.cookies}")
@@ -113,7 +100,7 @@ class LoginApp(QWidget):
                 if self.login.unencrypt(password, salt, key):
                     self.current_cookie = self.cookie_manager.bake()
                     self.current_user = username
-                    save_session(username, self.current_cookie)
+                    self.session_manager.save_session(username, self.current_cookie)
                     self.status_label.setText(f"Logged in as {username}\nSession: {self.current_cookie}")
                     self.logout_btn.setEnabled(True)
                     self.login_btn.setEnabled(False)
@@ -144,7 +131,7 @@ class LoginApp(QWidget):
     def logout_user(self):
         if self.current_cookie:
             self.cookie_manager.rottenCookie(self.current_cookie)
-            clear_session()
+            self.session_manager.clear_session()
             self.current_cookie = None
             self.current_user = None
             self.status_label.setText("Not logged in.")
