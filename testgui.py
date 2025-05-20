@@ -64,7 +64,6 @@ class LoginApp(QWidget):
 
         self.password_label = QLabel("Password:")
         self.password_entry = QLineEdit()
-        self.password_entry.setEchoMode(QLineEdit.EchoMode.Password)
         pass_layout.addWidget(self.password_label)
         pass_layout.addWidget(self.password_entry)
 
