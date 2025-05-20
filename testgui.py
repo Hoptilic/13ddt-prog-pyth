@@ -3,7 +3,7 @@ import sys
 import os
 from socketing.login import Login
 from socketing.cookie import CookieManager
-from socketing.session import SessionFileManager
+from socketing.session import SessionManager
 
 USER_FILE = "users.txt"
 
@@ -21,7 +21,7 @@ def load_users():
                     users[parts[0]] = (parts[1], parts[2])
     return users
 
-session_manager = SessionFileManager()
+session_manager = SessionManager()
 
 class LoginApp(QWidget):
     def __init__(self):

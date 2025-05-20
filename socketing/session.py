@@ -1,6 +1,6 @@
 import os
 
-class SessionFileManager:
+class SessionManager:
     """
     Handles only the session.txt file: saving, loading, and clearing the current session (username and cookie).
     """
