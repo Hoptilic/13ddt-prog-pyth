@@ -17,7 +17,7 @@ class CookieManager():
                     self.cookies[cookie_id] = int(timeout)
         else:
             # Initialize the cookie storage
-            self.initCookieStorage()
+            self.createJar()
 
     def createJar(self):
         """
