@@ -172,3 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Remove specific files
+users.txt
+cookies.txt
+session.txt
