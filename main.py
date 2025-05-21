@@ -18,7 +18,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 # Local imports
-import gui.pages as pages
+from gui.pages import *
 import gui.widgets as widgets
 import gui.styles as styles
 
@@ -36,11 +36,11 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stacked_widget)
 
         self.pages = {
-            "home": pages.HomePage(),
-            "about": pages.AboutPage(),
-            "login": pages.LoginPage(),
-            "submissions": pages.SubmissionsPage(),
-            "user": pages.UserPage()
+            # "home": pages.HomePage(),
+            # "about": pages.AboutPage(),
+            "login": login.LoginPage(),
+            # "submissions": pages.SubmissionsPage(),
+            # "user": pages.UserPage()
         }
 
         for page in self.pages.values():
