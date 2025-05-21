@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, 
-    QLabel, QPushButton, QLineEdit, 
-    QMessageBox, QStackedWidget
+    QWidget, QVBoxLayout, 
+    QLabel, QPushButton, QLineEdit
 )
 from PyQt6.QtCore import Qt
 
