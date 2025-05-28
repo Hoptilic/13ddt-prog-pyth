@@ -1,9 +1,11 @@
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
+    QWidget, QVBoxLayout,
     QLabel, QPushButton
 )
 
 from PyQt6.QtCore import Qt
+
+from .recent_submissions import RecentSubmissions
 
 class leftNav(QWidget):
     """
@@ -36,8 +38,7 @@ class leftNav(QWidget):
         self.aboutButton = QPushButton("About")
         self.navLayout.addWidget(self.aboutButton)
 
-        self.placeholderTitle2 = QLabel("Previous submissions stuff")
-        self.navLayout.addWidget(self.placeholderTitle2, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.navLayout.addWidget(RecentSubmissions(), alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.navFrame.setLayout(self.navLayout)
         self.mainLayout.addWidget(self.navFrame, alignment=Qt.AlignmentFlag.AlignLeft)
