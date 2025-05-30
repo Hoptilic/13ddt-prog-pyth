@@ -23,12 +23,12 @@ class UserPage(QWidget):
         self.rightLayout = QVBoxLayout()
 
         self.rightFrame.setStyleSheet("#rightFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
+        #\
 
         self.title = QLabel("User")
         self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
 
         #/ Create handler that will contain all the user buttons
-
         self.userFrame = QWidget()
         self.userLayout = QVBoxLayout()   
         self.userFrame.setObjectName("userFrame")

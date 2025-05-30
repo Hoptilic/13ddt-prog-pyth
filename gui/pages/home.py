@@ -23,6 +23,7 @@ class HomePage(QWidget):
         self.rightLayout = QVBoxLayout()
 
         self.rightFrame.setStyleSheet("#rightFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
+        #\
 
         self.title = QLabel("What will we be writing about today?")
         self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -42,5 +43,6 @@ class HomePage(QWidget):
 
         self.rightFrame.setLayout(self.rightLayout)
         self.mainLayout.addWidget(self.rightFrame, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+        
         # Set the layout at the end to avoid issues with the layout not being set
         self.setLayout(self.mainLayout)

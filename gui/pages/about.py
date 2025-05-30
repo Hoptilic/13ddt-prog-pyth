@@ -26,9 +26,9 @@ class AboutPage(QWidget):
 
         self.title = QLabel("Knowledgebase")
         self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
+        #\
 
         #/ Create handler that will contain all the FAQ buttons
-
         self.faqHandlerFrame = QWidget()
         self.faqHandlerLayout = QVBoxLayout()   
         self.faqHandlerFrame.setObjectName("faqHandlerFrame")
