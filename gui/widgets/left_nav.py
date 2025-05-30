@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 from .recent_submissions import RecentSubmissions
+from .account import AccountWidget
 
 class leftNav(QWidget):
     """
@@ -26,8 +27,7 @@ class leftNav(QWidget):
 
         self.navFrame.setStyleSheet("#navFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
 
-        self.placeholderTitle = QLabel("Account Stuff")
-        self.navLayout.addWidget(self.placeholderTitle, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.navLayout.addWidget(AccountWidget(), alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.homeButton = QPushButton("Dashboard")
         self.navLayout.addWidget(self.homeButton)

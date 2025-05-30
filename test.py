@@ -59,12 +59,6 @@ from gui.pages.home import HomePage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 import sys
 
-def test_home_page():
-    """
-    Test the HomePage class to ensure it initializes correctly.
-    """
-    home_page = HomePage()
-
 class testHomeSize(QMainWindow):
     """
     Test the HomePage class to ensure it initializes correctly.
