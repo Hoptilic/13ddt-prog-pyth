@@ -56,20 +56,31 @@
 #     print("All tests passed!")
 
 from gui.pages.home import HomePage
+from gui.pages.about import AboutPage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 import sys
 
-class testHomeSize(QMainWindow):
+# class testHomeSize(QMainWindow):
+#     """
+#     Test the HomePage class to ensure it initializes correctly.
+#     """
+#     def __init__(self):
+#         super().__init__()
+#         self.setWindowTitle("NCAI")
+#         self.resize(1440, 900)
+#         self.setCentralWidget(HomePage())
+
+class testAboutsize(QMainWindow):
     """
-    Test the HomePage class to ensure it initializes correctly.
+    Test the AboutPage class to ensure it initializes correctly.
     """
     def __init__(self):
         super().__init__()
         self.setWindowTitle("NCAI")
         self.resize(1440, 900)
-        self.setCentralWidget(HomePage())
+        self.setCentralWidget(AboutPage())
 
 app = QApplication(sys.argv)
-window = testHomeSize()
+window = testAboutsize()
 window.show()
 sys.exit(app.exec())

@@ -36,8 +36,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.stacked_widget)
 
         self.pages = {
-            # "home": pages.HomePage(),
-            # "about": pages.AboutPage(),
+            "home": home.HomePage(),
+            "about": about.AboutPage(),
             "login": login.LoginPage(),
             # "submissions": pages.SubmissionsPage(),
             # "user": pages.UserPage()

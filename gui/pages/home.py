@@ -10,7 +10,7 @@ class HomePage(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("NCAI - Login")
+        self.setWindowTitle("NCAI - Home")
         
         self.mainLayout = QHBoxLayout()
         
