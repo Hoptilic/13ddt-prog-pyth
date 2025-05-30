@@ -15,20 +15,20 @@
 # def test_cookie_manager():
 #     cm = socketing.cookie.CookieManager()
 #     cm.initCookieStorage()
-#     # Test cookie creation
+#
 #     cookie_id = cm.createCookie()
 #     assert isinstance(cookie_id, str) and len(cookie_id) == 32, "Cookie ID format incorrect"
 #     assert cm.checkCookie(cookie_id) == True, "Cookie should exist after creation"
-#     # Test best before date (simulate expired cookie)
+#
 #     cm.cookies[cookie_id] = 0  # Expire the cookie
 #     assert cm.checkBestBeforeDate(cookie_id) == False, "Expired cookie should be invalid"
-#     # Test freshenCookie
+#
 #     cookie_id2 = cm.createCookie()
 #     assert cm.freshenCookie(cookie_id2) == True, "Should be able to freshen cookie"
-#     # Test rottenCookie
+#
 #     assert cm.rottenCookie(cookie_id2) == True, "Should be able to remove cookie"
 #     assert cm.checkCookie(cookie_id2) == False, "Cookie should not exist after removal"
-#     # Test saveCookies and file output
+#
 #     cookie_id3 = cm.createCookie()
 #     cm.saveCookies()
 #     assert os.path.exists("cookies.txt"), "cookies.txt should exist after saving"
@@ -42,56 +42,109 @@
 #     cm = socketing.cookie.CookieManager()
 #     cm.initCookieStorage()
 #     cookie_id = cm.createCookie()
-#     # Patch Login to use our CookieManager instance
+#
 #     login.checkCookie = cm.checkCookie
 #     login.freshenCookie = cm.freshenCookie
 #     login.createCookie = cm.createCookie
 #     assert login.grantCookie(cookie_id) == True, "grantCookie should return True"
 #     print("grantCookie tests passed!")
 
-# if __name__ == "__main__":
-#     test_login()
-#     test_cookie_manager()
-#     test_grant_cookie()
-#     print("All tests passed!")
+# test_login()
+# test_cookie_manager()
+# test_grant_cookie()
+# print("All tests passed!")
 
 from gui.pages.home import HomePage
 from gui.pages.about import AboutPage
 from gui.pages.user import UserPage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
+from PyQt6.QtCore import Qt
 import sys
 
-# class testHomeSize(QMainWindow):
-#     """
-#     Test the HomePage class to ensure it initializes correctly.
-#     """
-#     def __init__(self):
-#         super().__init__()
-#         self.setWindowTitle("NCAI")
-#         self.resize(1440, 900)
-#         self.setCentralWidget(HomePage())
+class testHomeSize(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("NCAI")
+        self.resize(1440, 900)
+        self.setCentralWidget(HomePage())
 
-# class testAboutsize(QMainWindow):
-#     """
-#     Test the AboutPage class to ensure it initializes correctly.
-#     """
-#     def __init__(self):
-#         super().__init__()
-#         self.setWindowTitle("NCAI")
-#         self.resize(1440, 900)
-#         self.setCentralWidget(AboutPage())
+class testAboutSize(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("NCAI")
+        self.resize(1440, 900)
+        self.setCentralWidget(AboutPage())
 
-class testUsersize(QMainWindow):
-    """
-    Test the UserPage class to ensure it initializes correctly.
-    """
+class testUserSize(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("NCAI")
         self.resize(1440, 900)
         self.setCentralWidget(UserPage())
 
+class PageTester(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("NCAI - Page Tester")
+        self.resize(400, 400)
+        
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        layout = QVBoxLayout(central_widget)
+        
+        title = QLabel("NCAI Page Tester")
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(title)
+
+        self.homeBtn = QPushButton("Test Home Page")
+        self.homeBtn.clicked.connect(self.testHomePage)
+        layout.addWidget(self.homeBtn)
+        
+        self.aboutBtn = QPushButton("Test About Page")
+        self.aboutBtn.clicked.connect(self.testAboutPage)
+        layout.addWidget(self.aboutBtn)
+        
+        self.userBtn = QPushButton("Test User Page")
+        self.userBtn.clicked.connect(self.testUserPage)
+        layout.addWidget(self.userBtn)
+        
+        self.testAllBtn = QPushButton("Test All Pages")
+        self.testAllBtn.clicked.connect(self.testAllPages)
+        layout.addWidget(self.testAllBtn)
+        
+        self.openWindows = []
+    
+    def testHomePage(self):
+        try:
+            window = testHomeSize()
+            window.show()
+            self.openWindows.append(window)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open Home Page: {str(e)}")
+    
+    def testAboutPage(self):
+        try:
+            window = testAboutSize()
+            window.show()
+            self.openWindows.append(window)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open About Page: {str(e)}")
+    
+    def testUserPage(self):
+        try:
+            window = testUserSize()
+            window.show()
+            self.openWindows.append(window)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open User Page: {str(e)}")
+    
+    def testAllPages(self):
+        self.testHomePage()
+        self.testAboutPage()
+        self.testUserPage()
+
 app = QApplication(sys.argv)
-window = testUsersize()
+window = PageTester()
 window.show()
 sys.exit(app.exec())
+
