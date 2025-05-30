@@ -57,6 +57,7 @@
 
 from gui.pages.home import HomePage
 from gui.pages.about import AboutPage
+from gui.pages.user import UserPage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 import sys
 
@@ -70,17 +71,27 @@ import sys
 #         self.resize(1440, 900)
 #         self.setCentralWidget(HomePage())
 
-class testAboutsize(QMainWindow):
+# class testAboutsize(QMainWindow):
+#     """
+#     Test the AboutPage class to ensure it initializes correctly.
+#     """
+#     def __init__(self):
+#         super().__init__()
+#         self.setWindowTitle("NCAI")
+#         self.resize(1440, 900)
+#         self.setCentralWidget(AboutPage())
+
+class testUsersize(QMainWindow):
     """
-    Test the AboutPage class to ensure it initializes correctly.
+    Test the UserPage class to ensure it initializes correctly.
     """
     def __init__(self):
         super().__init__()
         self.setWindowTitle("NCAI")
         self.resize(1440, 900)
-        self.setCentralWidget(AboutPage())
+        self.setCentralWidget(UserPage())
 
 app = QApplication(sys.argv)
-window = testAboutsize()
+window = testUsersize()
 window.show()
 sys.exit(app.exec())
