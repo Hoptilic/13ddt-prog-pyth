@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, 
-    QLabel, QPushButton, QLineEdit
+    QLabel, QPushButton, QLineEdit, QStackedWidget
 )
 from PyQt6.QtCore import Qt
 
@@ -9,51 +9,53 @@ class LoginPage(QWidget):
         super().__init__()
 
         self.setWindowTitle("NCAI - Login")
-        
         self.mainLayout = QVBoxLayout()
-        
-        #/ Create the layout for the initial selection
+        self.stackedWidget = QStackedWidget()
+
         self.initFrame = QWidget()
         self.initLayout = QVBoxLayout()
 
         self.title = QLabel("Welcome to NCAI")
-        self.initLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.initLayout.addWidget(self.title)
 
         self.loginMenuButton = QPushButton("Login")
-        self.loginMenuButton.clicked.connect(self.loginButtonEvent)
-        self.initLayout.addWidget(self.loginMenuButton)
+        self.loginMenuButton.clicked.connect(self.showLoginFrame)
+        self.initLayout.addWidget(self.loginMenuButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.registerMenuButton = QPushButton("Register")
-        self.registerMenuButton.clicked.connect(self.registerButtonEvent)
-        self.initLayout.addWidget(self.registerMenuButton)
+        self.registerMenuButton.clicked.connect(self.showRegisterFrame)
+        self.initLayout.addWidget(self.registerMenuButton, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.initLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.initFrame.setLayout(self.initLayout)
-        self.mainLayout.addWidget(self.initFrame, alignment=Qt.AlignmentFlag.AlignCenter)
-        # Set the layout at the end to avoid issues with the layout not being set
+
+        self.loginFrame = LoginFrame(self)
+        self.registerFrame = RegisterFrame(self)
+
+        self.stackedWidget.addWidget(self.initFrame)
+        self.stackedWidget.addWidget(self.loginFrame)
+        self.stackedWidget.addWidget(self.registerFrame)
+
+        self.mainLayout.addWidget(self.stackedWidget)
+        self.mainLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         self.setLayout(self.mainLayout)
+        self.stackedWidget.setCurrentIndex(0)
 
-    def loginButtonEvent(self):
-        """
-        Event handler for the login button.
-        """
-        self.loginFrame = loginFrame()
-        self.mainLayout.addWidget(self.loginFrame, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.initFrame.hide()
+    def showLoginFrame(self):
+        self.stackedWidget.setCurrentIndex(1)
 
-    def registerButtonEvent(self):
-        """
-        Event handler for the register button.
-        """
-        self.registerFrame = registerFrame()
-        self.mainLayout.addWidget(self.registerFrame, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.initFrame.hide()
+    def showRegisterFrame(self):
+        self.stackedWidget.setCurrentIndex(2)
 
-class loginFrame(QWidget):
-    def __init__(self):
+    def showInitFrame(self):
+        self.stackedWidget.setCurrentIndex(0)
+
+class LoginFrame(QWidget):
+    def __init__(self, parent):
         super().__init__()
-        self.setWindowTitle("NCAI - Login")
+        self.parent = parent
 
-        self.loginFrame = QWidget()
         self.loginLayout = QVBoxLayout()
 
         self.loginTitle = QLabel("Login")
@@ -61,27 +63,30 @@ class loginFrame(QWidget):
 
         self.usernameLabel = QLabel("Username:")
         self.usernameEntry = QLineEdit()
-        self.loginLayout.addWidget(self.usernameLabel)
-        self.loginLayout.addWidget(self.usernameEntry)
+        self.loginLayout.addWidget(self.usernameLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.loginLayout.addWidget(self.usernameEntry, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.passwordLabel = QLabel("Password:")
         self.passwordEntry = QLineEdit()
         self.passwordEntry.setEchoMode(QLineEdit.EchoMode.Password)
-        self.loginLayout.addWidget(self.passwordLabel)
-        self.loginLayout.addWidget(self.passwordEntry)
+        self.loginLayout.addWidget(self.passwordLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.loginLayout.addWidget(self.passwordEntry, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.loginButton = QPushButton("Login")
         self.loginLayout.addWidget(self.loginButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        print("Login button clicked")
-        self.setLayout(self.loginLayout)
-        
-class registerFrame(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("NCAI - Register")
+        self.backButton = QPushButton("Back")
+        self.backButton.clicked.connect(self.parent.showInitFrame)
+        self.loginLayout.addWidget(self.backButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.registerFrame = QWidget()
+        self.loginLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setLayout(self.loginLayout)
+
+class RegisterFrame(QWidget):
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+
         self.registerLayout = QVBoxLayout()
 
         self.registerTitle = QLabel("Register")
@@ -89,17 +94,21 @@ class registerFrame(QWidget):
 
         self.usernameLabel = QLabel("Username:")
         self.usernameEntry = QLineEdit()
-        self.registerLayout.addWidget(self.usernameLabel)
-        self.registerLayout.addWidget(self.usernameEntry)
+        self.registerLayout.addWidget(self.usernameLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.registerLayout.addWidget(self.usernameEntry, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.passwordLabel = QLabel("Password:")
         self.passwordEntry = QLineEdit()
         self.passwordEntry.setEchoMode(QLineEdit.EchoMode.Password)
-        self.registerLayout.addWidget(self.passwordLabel)
-        self.registerLayout.addWidget(self.passwordEntry)
+        self.registerLayout.addWidget(self.passwordLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.registerLayout.addWidget(self.passwordEntry, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.registerButton = QPushButton("Regster")
+        self.registerButton = QPushButton("Register")
         self.registerLayout.addWidget(self.registerButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        print("Register button clicked")
+        self.backButton = QPushButton("Back")
+        self.backButton.clicked.connect(self.parent.showInitFrame)
+        self.registerLayout.addWidget(self.backButton, alignment=Qt.AlignmentFlag.AlignCenter)
+        
+        self.registerLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setLayout(self.registerLayout)

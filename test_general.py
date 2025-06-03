@@ -57,9 +57,11 @@
 from gui.pages.home import HomePage
 from gui.pages.about import AboutPage
 from gui.pages.user import UserPage
+from gui.pages.login import LoginPage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 from PyQt6.QtCore import Qt
 import sys
+import logging
 
 class testHomeSize(QMainWindow):
     def __init__(self):
@@ -81,6 +83,13 @@ class testUserSize(QMainWindow):
         self.setWindowTitle("NCAI")
         self.resize(1440, 900)
         self.setCentralWidget(UserPage())
+
+class testLoginSize(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("NCAI")
+        self.resize(1440, 900)
+        self.setCentralWidget(LoginPage())
 
 class PageTester(QMainWindow):
     def __init__(self):
@@ -107,6 +116,10 @@ class PageTester(QMainWindow):
         self.userBtn = QPushButton("Test User Page")
         self.userBtn.clicked.connect(self.testUserPage)
         layout.addWidget(self.userBtn)
+
+        self.userBtn = QPushButton("Test Login Page")
+        self.userBtn.clicked.connect(self.testLoginPage)
+        layout.addWidget(self.userBtn)
         
         self.testAllBtn = QPushButton("Test All Pages")
         self.testAllBtn.clicked.connect(self.testAllPages)
@@ -121,6 +134,7 @@ class PageTester(QMainWindow):
             self.openWindows.append(window)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open Home Page: {str(e)}")
+            logging.error(f"Failed to open Home Page: {str(e)}")
     
     def testAboutPage(self):
         try:
@@ -129,6 +143,7 @@ class PageTester(QMainWindow):
             self.openWindows.append(window)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open About Page: {str(e)}")
+            logging.error(f"Failed to open About Page: {str(e)}")
     
     def testUserPage(self):
         try:
@@ -137,11 +152,22 @@ class PageTester(QMainWindow):
             self.openWindows.append(window)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open User Page: {str(e)}")
+            logging.error(f"Failed to open User Page: {str(e)}")
+
+    def testLoginPage(self):
+        try:
+            window = testLoginSize()
+            window.show()
+            self.openWindows.append(window)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open User Page: {str(e)}")
+            logging.error(f"Failed to open User Page: {str(e)}")
     
     def testAllPages(self):
         self.testHomePage()
         self.testAboutPage()
         self.testUserPage()
+        self.testLoginPage()
 
 app = QApplication(sys.argv)
 window = PageTester()
