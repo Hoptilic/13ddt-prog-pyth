@@ -5,22 +5,6 @@ from socketing.login import Login
 from socketing.cookie import CookieManager
 from socketing.session import SessionManager
 
-USER_FILE = "users.txt"
-
-def save_user(username, salt, key):
-    with open(USER_FILE, "a") as f:
-        f.write(f"{username}:{salt}:{key}\n")
-
-def load_users():
-    users = {}
-    if os.path.exists(USER_FILE):
-        with open(USER_FILE, "r") as f:
-            for line in f:
-                parts = line.strip().split(":")
-                if len(parts) == 3:
-                    users[parts[0]] = (parts[1], parts[2])
-    return users
-
 session_manager = SessionManager()
 
 class LoginApp(QWidget):
@@ -28,7 +12,7 @@ class LoginApp(QWidget):
         super().__init__()
         self.setWindowTitle("Login GUI")
         self.login = Login()
-        self.users = load_users()
+        self.users = self.login.load_users()
         self.cookie_manager = CookieManager()
         self.cookie_manager.createJar()
         self.current_cookie = None
@@ -122,8 +106,8 @@ class LoginApp(QWidget):
         try:
             if self.login.validate(password):
                 salt, key = self.login.encrypt(password)
-                save_user(username, salt, key)
-                self.users = load_users()
+                self.login.save_user(username, salt, key)
+                self.users = self.login.load_users()
                 QMessageBox.information(self, "Success", "User registered!")
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))

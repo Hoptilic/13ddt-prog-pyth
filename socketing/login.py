@@ -68,3 +68,21 @@ class Login():
             self.createCookie()
         
         return True
+
+    # Temporarily use text files until a database is implemented
+
+    def save_user(self, username, salt, key):
+        USER_FILE = "users.txt"
+        with open(USER_FILE, "a") as f:
+            f.write(f"{username}:{salt}:{key}\n")
+
+    def load_users(self):
+        users = {}
+        USER_FILE = "users.txt"
+        if os.path.exists(USER_FILE):
+            with open(USER_FILE, "r") as f:
+                for line in f:
+                    parts = line.strip().split(":")
+                    if len(parts) == 3:
+                        users[parts[0]] = (parts[1], parts[2])
+        return users

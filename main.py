@@ -11,9 +11,8 @@ import logging
 
 # PyQT Imports
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, 
-    QLabel, QPushButton, QLineEdit, 
-    QMessageBox, QStackedWidget
+    QApplication, QMainWindow, 
+    QStackedWidget
 )
 from PyQt6.QtCore import Qt
 
@@ -21,6 +20,10 @@ from PyQt6.QtCore import Qt
 from gui.pages import *
 import gui.widgets as widgets
 import gui.styles as styles
+from socketing.login import Login
+from socketing.cookie import CookieManager
+from socketing.session import SessionManager
+
 
 class MainWindow(QMainWindow):
     """
@@ -31,7 +34,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("NCAI")
         self.resize(1440, 900)
-
+        # At some point make another widget so that the left_nav is loaded once at the start of the program instead of in each page
         self.stacked_widget = QStackedWidget()
         self.setCentralWidget(self.stacked_widget)
 
@@ -39,8 +42,8 @@ class MainWindow(QMainWindow):
             "home": home.HomePage(),
             "about": about.AboutPage(),
             "login": login.LoginPage(),
-            # "submissions": pages.SubmissionsPage(),
-            # "user": pages.UserPage()
+            "submissions": submissions.SubmissionsPage(),
+            "user": user.UserPage()
         }
 
         for page in self.pages.values():
