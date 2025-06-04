@@ -1,12 +1,19 @@
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, 
+    QWidget, QVBoxLayout, QMessageBox,
     QLabel, QPushButton, QLineEdit, QStackedWidget
 )
 from PyQt6.QtCore import Qt
+from socketing.login import Login
+from socketing.cookie import CookieManager
+from socketing.session import SessionManager
 
 class LoginPage(QWidget):
-    def __init__(self):
+    def __init__(self, event_manager=None):
         super().__init__()
+        self.event_manager = event_manager
+        self.login_manager = Login()
+        self.cookie_manager = CookieManager()
+        self.session_manager = SessionManager()
 
         self.setWindowTitle("NCAI - Login")
         self.mainLayout = QVBoxLayout()
@@ -29,8 +36,8 @@ class LoginPage(QWidget):
 
         self.initFrame.setLayout(self.initLayout)
 
-        self.loginFrame = LoginFrame(self)
-        self.registerFrame = RegisterFrame(self)
+        self.loginFrame = LoginFrame(self, self.event_manager, self.login_manager, self.cookie_manager, self.session_manager)
+        self.registerFrame = RegisterFrame(self, self.event_manager, self.login_manager, self.cookie_manager, self.session_manager)
 
         self.stackedWidget.addWidget(self.initFrame)
         self.stackedWidget.addWidget(self.loginFrame)
@@ -52,9 +59,13 @@ class LoginPage(QWidget):
         self.stackedWidget.setCurrentIndex(0)
 
 class LoginFrame(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None):
         super().__init__()
         self.parent = parent
+        self.event_manager = event_manager
+        self.login_manager = login_manager
+        self.cookie_manager = cookie_manager
+        self.session_manager = session_manager
 
         self.loginLayout = QVBoxLayout()
 
@@ -73,6 +84,7 @@ class LoginFrame(QWidget):
         self.loginLayout.addWidget(self.passwordEntry, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.loginButton = QPushButton("Login")
+        self.loginButton.clicked.connect(self.login_user)
         self.loginLayout.addWidget(self.loginButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.backButton = QPushButton("Back")
@@ -82,10 +94,36 @@ class LoginFrame(QWidget):
         self.loginLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setLayout(self.loginLayout)
 
+    def login_user(self):
+        users = self.login_manager.load_users()
+        self.cookie_manager.createJar()
+
+        username = self.usernameEntry.text()
+        if username in users:
+            salt, key = users[username]
+            try:
+                if self.login_manager.unencrypt(self.passwordEntry.text(), salt, key):
+                    current_cookie = self.cookie_manager.bake()
+                    self.loginButton.setEnabled(False)
+                    self.session_manager.save_session(username, current_cookie)
+                    if self.event_manager:
+                        self.event_manager.login_success.emit(username)
+                    QMessageBox.information(self, "Success", "Login successful! Session started.")
+                else:
+                    QMessageBox.critical(self, "Error", "Incorrect password.")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", str(e))
+        else:
+            QMessageBox.critical(self, "Error", "User not found.")
+
 class RegisterFrame(QWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None):
         super().__init__()
         self.parent = parent
+        self.event_manager = event_manager
+        self.login_manager = login_manager
+        self.cookie_manager = cookie_manager
+        self.session_manager = session_manager
 
         self.registerLayout = QVBoxLayout()
 
