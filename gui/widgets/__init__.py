@@ -1,1 +1,1 @@
-__all__ = ["left_Nav", "leftNav"]
+__all__ = ["left_nav", "account", "recent_submissions"]

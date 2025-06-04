@@ -46,8 +46,9 @@ class leftNav(QWidget):
         self.navFrame.setLayout(self.navLayout)
         self.mainLayout.addWidget(self.navFrame, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self.update_widget()
         self.setLayout(self.mainLayout)
+
+        self.update_widget()
 
     def update_widget(self):
         self.account_widget.update_account_info()

@@ -12,12 +12,13 @@ import logging
 # PyQT Imports
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, 
-    QStackedWidget
+    QStackedWidget, QWidget, QHBoxLayout
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QObject
 
 # Local imports
 from gui.pages import *
+from gui.widgets import *
 import gui.widgets as widgets
 import gui.styles as styles
 
@@ -44,7 +45,9 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("NCAI")
         self.resize(1440, 900)
         self.event_manager = EventManager()
+
         # At some point make another widget so that the left_nav is loaded once at the start of the program instead of in each page
+
         self.stacked_widget = QStackedWidget()
         self.setCentralWidget(self.stacked_widget)
 
