@@ -47,9 +47,13 @@ class MainWindow(QMainWindow):
         self.event_manager = EventManager()
 
         # At some point make another widget so that the left_nav is loaded once at the start of the program instead of in each page
+        self.main_frame = QWidget()
+        self.main_layout = QHBoxLayout(self.main_frame)
+        self.main_frame.setLayout(self.main_layout)
 
         self.stacked_widget = QStackedWidget()
-        self.setCentralWidget(self.stacked_widget)
+        self.main_layout.addWidget(self.stacked_widget, 3)
+        self.setCentralWidget(self.main_frame)
 
         self.pages = {
             "home": home.HomePage(),
@@ -74,7 +78,15 @@ class MainWindow(QMainWindow):
         Switch to the specified page.
         """
         if page_name in self.pages:
-            self.stacked_widget.setCurrentWidget(self.pages[page_name])
+            # Add the left navigation widget if not on login page - only add it once so we don't have multiple instances
+            # Makes updating the information and handling events much, much easier as the left_nav object is created
+            # In the main logic file by defualt
+            if page_name == "login":
+                self.stacked_widget.setCurrentWidget(self.pages[page_name])
+                self.main_layout.removeWidget(self.main_layout.itemAt(0).widget())
+            else:
+                self.stacked_widget.setCurrentWidget(self.pages[page_name])
+                self.main_layout.insertWidget(0, left_nav.leftNav(), 1, alignment=Qt.AlignmentFlag.AlignLeft)
         else:
             logging.error(f"Page '{page_name}' does not exist.")
 

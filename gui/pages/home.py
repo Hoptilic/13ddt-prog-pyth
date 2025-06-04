@@ -13,9 +13,6 @@ class HomePage(QWidget):
         self.setWindowTitle("NCAI - Home")
         
         self.mainLayout = QHBoxLayout()
-        
-        # Add the left navigation widget to the left side of the main layout
-        self.mainLayout.addWidget(leftNav(), 1, alignment=Qt.AlignmentFlag.AlignLeft)
 
         #/ Create the rest of the home page - right side
         self.rightFrame = QWidget()
