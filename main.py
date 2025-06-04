@@ -20,9 +20,6 @@ from PyQt6.QtCore import Qt, pyqtSignal, QThread, QObject
 from gui.pages import *
 import gui.widgets as widgets
 import gui.styles as styles
-from socketing.login import Login
-from socketing.cookie import CookieManager
-from socketing.session import SessionManager
 
 class EventManager(QObject):
     """
@@ -30,7 +27,7 @@ class EventManager(QObject):
     Use this to decouple communication between pages, widgets, and the main window.
     """
     login_success = pyqtSignal(str)  # emits username
-    logout = pyqtSignal()
+    logout = pyqtSignal() # emits nothing (logout doesnt need anything passed, maybe?)
     register_success = pyqtSignal(str)  # emits username
     switch_page = pyqtSignal(str)  # emits page name
 
@@ -64,7 +61,6 @@ class MainWindow(QMainWindow):
 
         # Connect event manager signals to slots
         self.event_manager.login_success.connect(lambda username: self.switch_page("home"))
-        self.event_manager.logout.connect(lambda: self.switch_page("login"))
         self.event_manager.switch_page.connect(self.switch_page)
 
         # This behaviour will change as the login page will be skipped if the user is already signed in
