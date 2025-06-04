@@ -142,6 +142,7 @@ class RegisterFrame(QWidget):
         self.registerLayout.addWidget(self.passwordEntry, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.registerButton = QPushButton("Register")
+        self.registerButton.clicked.connect(self.register_user)
         self.registerLayout.addWidget(self.registerButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.backButton = QPushButton("Back")
@@ -150,3 +151,19 @@ class RegisterFrame(QWidget):
         
         self.registerLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setLayout(self.registerLayout)
+
+    def register_user(self):
+        users = self.login_manager.load_users()
+        self.cookie_manager.createJar()
+
+        username = self.usernameEntry.text()
+        if username in users:
+            QMessageBox.critical(self, "Error", "User already exists.")
+            return
+        try:
+            if self.login_manager.validate(self.passwordEntry.text()):
+                salt, key = self.login_manager.encrypt(self.passwordEntry.text())
+                self.login_manager.save_user(username, salt, key)
+                QMessageBox.information(self, "Success", "User registered!")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", str(e))

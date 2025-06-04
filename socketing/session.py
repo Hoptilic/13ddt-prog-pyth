@@ -33,3 +33,7 @@ class SessionManager:
             os.remove(self.session_file)
         self.current_user = None
         self.current_cookie = None
+
+    def get_current_user_from_session(self):
+        self.load_session()
+        return self.current_user

@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, 
     QStackedWidget
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QThread, QObject
+from PyQt6.QtCore import Qt, pyqtSignal, QObject
 
 # Local imports
 from gui.pages import *

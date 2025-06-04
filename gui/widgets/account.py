@@ -5,12 +5,16 @@ from PyQt6.QtWidgets import (
 
 from PyQt6.QtCore import Qt
 
+from socketing.session import SessionManager
+
 class AccountWidget(QWidget):
     """
     Widget to display recent submissions.
     """
     def __init__(self):
         super().__init__()
+
+        self.session_manager = SessionManager()
 
         self.setWindowTitle("Recent Submissions")
 
@@ -48,9 +52,10 @@ class AccountWidget(QWidget):
         self.usernameLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.userpackageLayout.addWidget(self.usernameLabel, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        self.packageLabel = QLabel("placeholder")
-        self.packageLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.userpackageLayout.addWidget(self.packageLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Not currently using packages
+        # self.packageLabel = QLabel("placeholder")
+        # self.packageLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # self.userpackageLayout.addWidget(self.packageLabel, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.userpackageFrame.setLayout(self.userpackageLayout)
         #\
@@ -66,3 +71,14 @@ class AccountWidget(QWidget):
         self.mainLayout.addWidget(self.notificationsButton, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(self.mainLayout)
+
+    def update_account_info(self):
+        """
+        Update the account information displayed in the widget.
+        This method should be called whenever the account information changes.
+        """
+        user = self.session_manager.get_current_user_from_session()
+        if user:
+            self.usernameLabel.setText(f'{user}')
+        else:
+            self.usernameLabel.setText("Not logged in")

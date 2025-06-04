@@ -28,7 +28,8 @@ class leftNav(QWidget):
         self.navFrame.setStyleSheet("#navFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
 
         # Add the account widget at the top
-        self.navLayout.addWidget(AccountWidget(), alignment=Qt.AlignmentFlag.AlignCenter)
+        self.account_widget = AccountWidget()
+        self.navLayout.addWidget(self.account_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.homeButton = QPushButton("Dashboard")
         self.navLayout.addWidget(self.homeButton)
@@ -44,5 +45,9 @@ class leftNav(QWidget):
 
         self.navFrame.setLayout(self.navLayout)
         self.mainLayout.addWidget(self.navFrame, alignment=Qt.AlignmentFlag.AlignLeft)
-        
+
+        self.update_widget()
         self.setLayout(self.mainLayout)
+
+    def update_widget(self):
+        self.account_widget.update_account_info()
