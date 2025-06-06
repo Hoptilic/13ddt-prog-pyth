@@ -58,6 +58,7 @@ from gui.pages.home import HomePage
 from gui.pages.about import AboutPage
 from gui.pages.user import UserPage
 from gui.pages.login import LoginPage
+from gui.pages.submissions import SubmissionsPage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 from PyQt6.QtCore import Qt
 import sys
@@ -91,6 +92,13 @@ class testLoginSize(QMainWindow):
         self.resize(1440, 900)
         self.setCentralWidget(LoginPage())
 
+class testSubmissionSize(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("NCAI")
+        self.resize(1440, 900)
+        self.setCentralWidget(SubmissionsPage())
+
 class PageTester(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -119,6 +127,10 @@ class PageTester(QMainWindow):
 
         self.userBtn = QPushButton("Test Login Page")
         self.userBtn.clicked.connect(self.testLoginPage)
+        layout.addWidget(self.userBtn)
+
+        self.userBtn = QPushButton("Test Submission Page")
+        self.userBtn.clicked.connect(self.testSubmissionPage)
         layout.addWidget(self.userBtn)
         
         self.testAllBtn = QPushButton("Test All Pages")
@@ -162,12 +174,22 @@ class PageTester(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open User Page: {str(e)}")
             logging.error(f"Failed to open User Page: {str(e)}")
+
+    def testSubmissionPage(self):
+        try:
+            window = testSubmissionSize()
+            window.show()
+            self.openWindows.append(window)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open Submissions Page: {str(e)}")
+            logging.error(f"Failed to open Submissions Page: {str(e)}")
     
     def testAllPages(self):
         self.testHomePage()
         self.testAboutPage()
         self.testUserPage()
         self.testLoginPage()
+        self.testSubmissionsPage()
 
 app = QApplication(sys.argv)
 window = PageTester()
