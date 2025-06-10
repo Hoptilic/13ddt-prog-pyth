@@ -3,6 +3,8 @@ This module is the general handler for the large-language model system used to p
 It handles the socket connection, message sending, and receiving.
 """
 
+from openai import OpenAI
+
 class FeedbackModule():
     def __init__(self):
         pass
