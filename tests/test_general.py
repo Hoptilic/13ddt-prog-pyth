@@ -54,6 +54,11 @@
 # test_grant_cookie()
 # print("All tests passed!")
 
+import sys, os
+
+# Add project root to sys.path for absolute imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from gui.pages.home import HomePage
 from gui.pages.about import AboutPage
 from gui.pages.user import UserPage
@@ -61,7 +66,6 @@ from gui.pages.login import LoginPage
 from gui.pages.submissions import SubmissionsPage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 from PyQt6.QtCore import Qt
-import sys
 import logging
 
 class testHomeSize(QMainWindow):
