@@ -7,8 +7,10 @@
 
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 from PyQt6.QtCore import Qt
-import sys
+import sys, os
 import logging
 
-from ..database import LLM_database_manage
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from database import LLM_database_manage
 
