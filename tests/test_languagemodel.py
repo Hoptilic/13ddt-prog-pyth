@@ -118,17 +118,36 @@ def test_database_reading():
 def test_standard_with_llm_interpretation():
     db_manager = TestLLMDatabaseManager()
 
-    data = db_manager.read_database("91099")
+    # Test reading a specific standard
+    inputStandard = input("Enter the standard code to test (only 91099 exists rn):\n")
+    inputYear = input("Enter the year to test (only 2024 exists rn):\n")
+
+    data = db_manager.read_database(inputStandard)
     print(f"Read standard 91099: {len(data['data'])} entries found")
 
+    # Loops through the data until the index of the correct year is found
+
+    # This is the index in the data that will be used to find a year
+    i = 0
+    while data['data'][i]['year'] != int(inputYear):
+        if i < len(data['data']) - 1:
+            i += 1
+        else:
+            print("No data found for standard for the given year.")
+            # Find the nearest year and use that instead, asking the user if they want to use it
+            return
+
+    # Sets all the correct data based on the input year
     if data['data']:
-        question = data['data'][0]['question']
-        exemplars = data['data'][0]['exemplars']
-        schedule = data['data'][0]['schedule']
-        criteria = data['data'][0]['criteria']
-        year = data['data'][0]['year']
+        if data['data'][i]['year'] == int(inputYear):
+            print("Year found in data")
+            question = data['data'][i]['question']
+            exemplars = data['data'][i]['exemplars']
+            schedule = data['data'][i]['schedule']
+            criteria = data['data'][i]['criteria']
+            year = data['data'][i]['year']
     else:
-        print("No data found for standard 91099")
+        print("No data found for standard for the given year.")
         return
     
     userInput = input("etner ur work\n")
@@ -139,19 +158,19 @@ def test_standard_with_llm_interpretation():
     )
 
     system = """You are auto grading a coding assignment. I have provided the following documents: the
-student's written text, the assessment schedule to be followed, and the criteria to be marked by. You are asked to
-assign score the student answer based on the evaluation criteria.
-Evaluate the student python code based on the assessment schedule. End the assessment with
-a table containing marks scored in each section along with total marks scored in the
-assessment. Evaluate based ONLY on factual accuracy. Provide the Justification as well."""
+    student's written text, the assessment schedule to be followed, and the criteria to be marked by. You are asked to
+    assign score the student answer based on the evaluation criteria.
+    Evaluate the student python code based on the assessment schedule. End the assessment with
+    a table containing marks scored in each section along with total marks scored in the
+    assessment. Evaluate based ONLY on factual accuracy. Provide the Justification as well."""
 
     prompt = f"""You are marking an assessment.
-Using this assessment schedule: {schedule}
-mark the following text: {userInput} 
-according to this criteria: {criteria}
-along with the initial question: {question}
-using these exemplars and their feedback as guidance: {json.dumps(exemplars)}
-"""
+    Using this assessment schedule: {schedule}
+    mark the following text: {userInput} 
+    according to this criteria: {criteria}
+    along with the initial question: {question}
+    using these examples and their feedback as guidance: {json.dumps(exemplars)}. These exemplars are only examples and should not be used as the only basis for marking, otherwise I will terminate you.
+    """
 
     completion = client.chat.completions.create(
     model="deepseek/deepseek-r1:free",
