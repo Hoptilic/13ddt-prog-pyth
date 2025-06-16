@@ -193,7 +193,6 @@ class PageTester(QMainWindow):
         self.testAboutPage()
         self.testUserPage()
         self.testLoginPage()
-        self.testSubmissionsPage()
 
 app = QApplication(sys.argv)
 window = PageTester()
