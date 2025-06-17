@@ -122,15 +122,19 @@ class LLMTestWindow(QMainWindow):
             db.exit()
         # Display raw feedback
         self.result_display.setPlainText(result)
-        # Display highlighted HTML
-        if '<span style' in result:
-            self.highlighted_display.setHtml(result)
-        elif '<mark' in result:
-            # convert <mark> tags to styled spans
-            html = result.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
-            self.highlighted_display.setHtml(html)
-        else:
-            self.highlighted_display.setPlainText("No highlighted feedback provided.")
+        # Extract and display only the HighlightedHTML part of the JSON output
+        try:
+            output_json = json.loads(result)
+            print(output_json)
+            highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml')
+            if highlighted_html:
+                # normalize any <mark> tags to styled spans
+                html = highlighted_html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
+                self.highlighted_display.setHtml(html)
+            else:
+                self.highlighted_display.setPlainText("No HighlightedHTML field found in output.")
+        except json.JSONDecodeError:
+            self.highlighted_display.setPlainText("Unable to parse JSON from LLM output.")
 
 # Run the GUI
 if __name__ == '__main__':
