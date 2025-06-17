@@ -192,14 +192,14 @@ def test_standard_with_llm_interpretation():
 
 
 
-if not test_database_connection():
-    print("Database connection failed. Exiting.")
-    exit()
+# if not test_database_connection():
+#     print("Database connection failed. Exiting.")
+#     exit()
 
-# Test database reading
-data = test_database_reading()
-if not data:
-    print("Database reading failed. Exiting.")
-    exit()
+# # Test database reading
+# data = test_database_reading()
+# if not data:
+#     print("Database reading failed. Exiting.")
+#     exit()
 
-test_standard_with_llm_interpretation()
+# test_standard_with_llm_interpretation()
