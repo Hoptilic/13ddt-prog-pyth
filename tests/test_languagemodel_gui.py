@@ -31,9 +31,12 @@ class LLMTestWindow(QMainWindow):
         # Button
         self.submit_btn = QPushButton("Submit for Grading")
         self.submit_btn.clicked.connect(self.handle_submit)
-        # Output area
+        # Output area for raw result
         self.result_display = QTextEdit()
         self.result_display.setReadOnly(True)
+        # Highlighted student text with feedback
+        self.highlighted_display = QTextEdit()
+        self.highlighted_display.setReadOnly(True)
         # Layout
         form_layout = QHBoxLayout()
         form_layout.addWidget(self.standard_input)
@@ -46,6 +49,8 @@ class LLMTestWindow(QMainWindow):
         main_layout.addWidget(self.submit_btn)
         main_layout.addWidget(QLabel("Grading Result:"))
         main_layout.addWidget(self.result_display)
+        main_layout.addWidget(QLabel("Highlighted Input with Feedback:"))
+        main_layout.addWidget(self.highlighted_display)
 
         container = QWidget()
         container.setLayout(main_layout)
@@ -79,23 +84,23 @@ class LLMTestWindow(QMainWindow):
         schedule = entry['schedule']
         criteria = entry['criteria']
         exemplars = entry['exemplars']
-        user_input = self.user_text.toPlainText().strip()
-        if not user_input:
+        userInput = self.user_text.toPlainText().strip()
+        if not userInput:
             QMessageBox.warning(self, "Input Error", "Please enter student work.")
             return
-        # Compose prompt
-        system_msg = ("""You are auto grading a coding assignment. I have provided the following documents: the
-    student's written text, the assessment schedule to be followed, and the criteria to be marked by. You are asked to
-    assign score the student answer based on the evaluation criteria.
-    Evaluate the student python code based on the assessment schedule. End the assessment with
-    a table containing marks scored in each section along with total marks scored in the
-    assessment. Evaluate based ONLY on factual accuracy. Provide the Justification as well.""")
+        # Compose prompt with HTML highlight instruction
+        system_msg = ("You are auto grading a coding assignment. I have provided the student's written text, "
+                      "the assessment schedule, and the criteria. Assign scores based on the criteria. "
+                      "Output in a json format {Output:StudentText, Grade, Feedback{Strengths, Areas for Improvement}, HighlightedHTML}. Within HighlightedHTML, output the student's original text as HTML, "
+                      "wrapping the segments you think needs improvement on with <span style='background-color: yellow'> tags for highlighting, closed by </span>. With each highlighted segment, place a tooltip with the feedback for that segment using the <span title='Feedback'> tag. "
+                      "Follow this format strictly, otherwise I will terminate you. Do not shorten any part of the text, or I will terminate you.")
         prompt = (f"""You are marking an assessment.
     Using this assessment schedule: {schedule}
-    mark the following text: {user_input} 
+    mark the following text: {userInput} 
     according to this criteria: {criteria}
     along with the initial question: {question}
-    using these examples and their feedback as guidance: {json.dumps(exemplars)}. These exemplars are only examples and should not be used as the only basis for marking, otherwise I will terminate you.""")
+    using these examples and their feedback as guidance: {json.dumps(exemplars)}. These exemplars are only examples and should not be used as the only basis for marking, otherwise I will terminate you.
+    """)
         # LLM call
         try:
             client = OpenAI(
@@ -115,7 +120,17 @@ class LLMTestWindow(QMainWindow):
             return
         finally:
             db.exit()
+        # Display raw feedback
         self.result_display.setPlainText(result)
+        # Display highlighted HTML
+        if '<span style' in result:
+            self.highlighted_display.setHtml(result)
+        elif '<mark' in result:
+            # convert <mark> tags to styled spans
+            html = result.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
+            self.highlighted_display.setHtml(html)
+        else:
+            self.highlighted_display.setPlainText("No highlighted feedback provided.")
 
 # Run the GUI
 if __name__ == '__main__':
