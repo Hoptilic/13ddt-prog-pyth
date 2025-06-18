@@ -126,9 +126,10 @@ class LLMTestWindow(QMainWindow):
         try:
             output_json = json.loads(result)
             print(output_json)
+            print(output_json.get('Output'))
             highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml')
             if highlighted_html:
-                # normalize any <mark> tags to styled spans
+                # normalize any <mark> tags to styled spans if the llm is on drugs (threatening to terminate it works most of the time)
                 html = highlighted_html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
                 self.highlighted_display.setHtml(html)
             else:
