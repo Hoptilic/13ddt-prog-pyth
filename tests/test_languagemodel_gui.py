@@ -92,8 +92,8 @@ class LLMTestWindow(QMainWindow):
         system_msg = ("You are auto grading a coding assignment. I have provided the student's written text, "
                       "the assessment schedule, and the criteria. Assign scores based on the criteria. "
                       "Output in a json format {Output:StudentText, Grade, Feedback{Strengths, Areas for Improvement}, HighlightedHTML}. Within HighlightedHTML, output the student's original text as HTML, "
-                      "wrapping the segments you think needs improvement on with <span style='background-color: yellow'> tags for highlighting, closed by </span>. With each highlighted segment, place a tooltip with the feedback for that segment using the <span title='Feedback'> tag. "
-                      "Follow this format strictly, otherwise I will terminate you. Do not shorten any part of the text, or I will terminate you.")
+                      "wrapping the segments you think needs improvement on with <span style='background-color: yellow'> tags for highlighting, closed by </span>. ENSURE THAT With each highlighted segment, place a tooltip with the feedback for that segment using the <span title='Feedback'> tag. "
+                      "Follow this format strictly, otherwise I will terminate you. Do not shorten any part of the text, or I will terminate you. Output only the json, without any trailing or preceding text, or I will terminate you. DO NOT specify the type of text (by putting json at the top of the output), or I will terminate you.")
         prompt = (f"""You are marking an assessment.
     Using this assessment schedule: {schedule}
     mark the following text: {userInput} 
@@ -125,8 +125,9 @@ class LLMTestWindow(QMainWindow):
         # Extract and display only the HighlightedHTML part of the JSON output
         try:
             output_json = json.loads(result)
-            print(output_json)
-            print(output_json.get('Output'))
+            # Debug the HighlightedHTML field
+            print(output_json.get('HighlightedHTML') or output_json.get('highlightedhtml'))
+            # Extract HighlightedHTML from top-level JSON
             highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml')
             if highlighted_html:
                 # normalize any <mark> tags to styled spans if the llm is on drugs (threatening to terminate it works most of the time)
@@ -136,12 +137,13 @@ class LLMTestWindow(QMainWindow):
                 self.highlighted_display.setPlainText("No HighlightedHTML field found in output.")
         except json.JSONDecodeError:
             self.highlighted_display.setPlainText("Unable to parse JSON from LLM output.")
+            print(result)
+            print(json.loads(result))
 
-# Run the GUI
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = LLMTestWindow()
-    window.resize(800, 600)
-    window.show()
-    sys.exit(app.exec())
+
+app = QApplication(sys.argv)
+window = LLMTestWindow()
+window.resize(800, 600)
+window.show()
+sys.exit(app.exec())
 
