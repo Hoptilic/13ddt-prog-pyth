@@ -21,49 +21,49 @@ class LLMTestWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("LLM Standard Grading GUI")
         # Widgets for standard and year
-        self.standard_input = QLineEdit()
-        self.standard_input.setPlaceholderText("Enter standard code (e.g., 91099)")
-        self.year_input = QLineEdit()
-        self.year_input.setPlaceholderText("Enter year (e.g., 2024)")
+        self.standardInput = QLineEdit()
+        self.standardInput.setPlaceholderText("Enter standard code (e.g., 91099)")
+        self.yearInput = QLineEdit()
+        self.yearInput.setPlaceholderText("Enter year (e.g., 2024)")
         # Text area for student input
-        self.user_text = QTextEdit()
-        self.user_text.setPlaceholderText("Enter student work here...")
+        self.userText = QTextEdit()
+        self.userText.setPlaceholderText("Enter student work here...")
         # Button
-        self.submit_btn = QPushButton("Submit for Grading")
-        self.submit_btn.clicked.connect(self.handle_submit)
+        self.submitBtn = QPushButton("Submit for Grading")
+        self.submitBtn.clicked.connect(self.handleSubmit)
         # Output area for raw result
-        self.result_display = QTextEdit()
-        self.result_display.setReadOnly(True)
+        self.resultDisplay = QTextEdit()
+        self.resultDisplay.setReadOnly(True)
         # Highlighted student text with feedback
-        self.highlighted_display = QTextEdit()
-        self.highlighted_display.setReadOnly(True)
+        self.highlightedDisplay = QTextEdit()
+        self.highlightedDisplay.setReadOnly(True)
         # Layout
         form_layout = QHBoxLayout()
-        form_layout.addWidget(self.standard_input)
-        form_layout.addWidget(self.year_input)
+        form_layout.addWidget(self.standardInput)
+        form_layout.addWidget(self.yearInput)
 
         main_layout = QVBoxLayout()
         main_layout.addLayout(form_layout)
         main_layout.addWidget(QLabel("Student Work:"))
-        main_layout.addWidget(self.user_text)
-        main_layout.addWidget(self.submit_btn)
+        main_layout.addWidget(self.userText)
+        main_layout.addWidget(self.submitBtn)
         main_layout.addWidget(QLabel("Grading Result:"))
-        main_layout.addWidget(self.result_display)
+        main_layout.addWidget(self.resultDisplay)
         main_layout.addWidget(QLabel("Highlighted Input with Feedback:"))
-        main_layout.addWidget(self.highlighted_display)
+        main_layout.addWidget(self.highlightedDisplay)
 
         container = QWidget()
         container.setLayout(main_layout)
         self.setCentralWidget(container)
 
-    def handle_submit(self):
-        standard = self.standard_input.text().strip()
-        year_text = self.year_input.text().strip()
-        if not standard or not year_text:
+    def handleSubmit(self):
+        standard = self.standardInput.text().strip()
+        yearText = self.yearInput.text().strip()
+        if not standard or not yearText:
             QMessageBox.warning(self, "Input Error", "Please enter both standard and year.")
             return
         try:
-            year = int(year_text)
+            year = int(yearText)
         except ValueError:
             QMessageBox.warning(self, "Input Error", "Year must be a number.")
             return
@@ -84,7 +84,7 @@ class LLMTestWindow(QMainWindow):
         schedule = entry['schedule']
         criteria = entry['criteria']
         exemplars = entry['exemplars']
-        userInput = self.user_text.toPlainText().strip()
+        userInput = self.userText.toPlainText().strip()
         if not userInput:
             QMessageBox.warning(self, "Input Error", "Please enter student work.")
             return
@@ -121,7 +121,7 @@ class LLMTestWindow(QMainWindow):
         finally:
             db.exit()
         # Display raw feedback
-        self.result_display.setPlainText(result)
+        self.resultDisplay.setPlainText(result)
         # Extract and display only the HighlightedHTML part of the JSON output
         try:
             output_json = json.loads(result)
@@ -132,11 +132,11 @@ class LLMTestWindow(QMainWindow):
             if highlighted_html:
                 # normalize any <mark> tags to styled spans if the llm is on drugs (threatening to terminate it works most of the time)
                 html = highlighted_html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
-                self.highlighted_display.setHtml(html)
+                self.highlightedDisplay.setHtml(html)
             else:
-                self.highlighted_display.setPlainText("No HighlightedHTML field found in output.")
+                self.highlightedDisplay.setPlainText("No HighlightedHTML field found in output.")
         except json.JSONDecodeError:
-            self.highlighted_display.setPlainText("Unable to parse JSON from LLM output.")
+            self.highlightedDisplay.setPlainText("Unable to parse JSON from LLM output.")
             print(result)
             print(json.loads(result))
 

@@ -72,16 +72,17 @@ def create_test_table(db_manager):
             {
                 "Exemplar": "Advanced student work with detailed analysis",
                 "Grade": "M5", 
-                "Feedback": "Student shows merit level work with good analytical skills"
+                "Feedback": "Student shows merit level work with good analytical skills etc etc"
             },
             {
-                "Exemplar": "Exceptional work with innovative solutions",
+                "Exemplar": "Exceptional work with innovative solutions and stuff like that",
                 "Grade": "E7",
                 "Feedback": "Excellence shown through comprehensive understanding and creativity"
             }
         ]
     }
     
+    # I'm actually not sure if this works at all as i've never had a broken db 
     db_manager.cursor.execute('''
         INSERT INTO "91099" (year, question, schedule, criteria, exemplars)
         VALUES (?, ?, ?, ?, ?)
@@ -105,7 +106,7 @@ def test_database_reading():
             print(f"Sample entry: Year {data['data'][0]['year']}")
             print(f"Question: {data['data'][0]['question']}")
             
-        # Test reading by year
+        # test reading by yr
         year_data = db_manager.read_standard_by_year("91099", 2024)
         print(f"Read standard 91099 for year 2024: {len(year_data['data'])} entries found")
         
@@ -129,15 +130,14 @@ def test_standard_with_llm_interpretation():
     print(f"Read standard 91099: {len(data['data'])} entries found")
 
     # Loops through the data until the index of the correct year is found
-
     # This is the index in the data that will be used to find a year
+    # this also will go away eventually because ive decided to use dropdowns instead
     i = 0
     while data['data'][i]['year'] != int(inputYear):
         if i < len(data['data']) - 1:
             i += 1
         else:
             print("No data found for standard for the given year.")
-            # Find the nearest year and use that instead, asking the user if they want to use it
             return
 
     # Sets all the correct data based on the input year

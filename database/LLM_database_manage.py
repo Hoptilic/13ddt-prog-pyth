@@ -29,11 +29,11 @@ class LLMDatabaseManager:
         Initializes the LLMDatabaseManager with the path to the SQLite database.
         """        
         # Use a test db for testing purposes rn
-        self.db_path = "./llm_testdatabase.db"
-        self.connection = sqlite3.connect(self.db_path)
+        self.dbPath = "./llm_testdatabase.db"
+        self.connection = sqlite3.connect(self.dbPath)
         self.cursor = self.connection.cursor()
 
-    def read_database(self, standard):
+    def readDatabase(self, standard):
         """
         Reads the database for a specific standard and returns the data in a structured format.
         """
@@ -57,7 +57,7 @@ class LLMDatabaseManager:
             data["data"].append(entry)
         return data
     
-    def read_standard_by_year(self, standard, year):
+    def readStandardByYear(self, standard, year):
         """
         Reads the database for a specific standard and year, returning the data in a structured format.
         """
@@ -82,7 +82,7 @@ class LLMDatabaseManager:
         
         return data
 
-    def exit(self):
+    def exit(self):  # method retained but uses camelCase for consistency
         """
         Exits the database conection.
         """
@@ -92,18 +92,18 @@ class ExemplarInterpet():
     """
     Class to interpret the exemplars from the database.
     """
-    def __init__(self, exemplar_data):
+    def __init__(self, exemplarData):
         """
         Initializes ExemplarInterpet with the exemplar data.
         """
-        self.exemplar_data = exemplar_data
+        self.exemplarData = exemplarData
 
-    def get_exemplars(self):
+    def getExemplars(self):
         """
         Returns the list of exemplars.
         """
-        return self.exemplar_data.get("exemplars", [])
-    def get_exemplars_by_grade(self, grade):
+        return self.exemplarData.get("exemplars", [])
+    def getExemplarsByGrade(self, grade):
         """
         Returns a list of exemplars for a specific grade (not achieved, achieved, merit, excellence).
         """
@@ -123,7 +123,7 @@ class ExemplarInterpet():
         }
 
         # Returns the list of exemplars for the specified grade.
-        exemplars = self.get_exemplars()
+        exemplars = self.getExemplars()
         target_grade_name = grade_mapping.get(grade, "")
         if not target_grade_name:
             return []
@@ -141,16 +141,16 @@ class ExemplarInterpet():
         
         return result
     
-    def get_exemplar_feedback(self, exemplar):
+    def getExemplarFeedback(self, exemplar):
         """
         Returns the feedback for a specific exemplar.
         """
         return exemplar.get("Feedback", "")
     
-    def get_exemplar_feedback_by_grade(self, grade):
+    def getExemplarFeedbackByGrade(self, grade):
         """
         Returns a list of the feedback for all exemplars of a specific grade.
         """
         # Returns the list of feedback for the specified grade.
-        exemplars = self.get_exemplars_by_grade(grade)
-        return [self.get_exemplar_feedback(exemplar) for exemplar in exemplars]
+        exemplars = self.getExemplarsByGrade(grade)
+        return [self.getExemplarFeedback(exemplar) for exemplar in exemplars]

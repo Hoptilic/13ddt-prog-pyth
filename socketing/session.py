@@ -1,39 +1,39 @@
 import os
 
-class SessionManager:
+class SessionFileManager:
     """
     Handles only the session.txt file: saving, loading, and clearing the current session (username and cookie).
     """
     def __init__(self, session_file="session.txt"):
-        self.session_file = session_file
-        self.current_user = None
-        self.current_cookie = None
-        self.load_session()
+        self.sessionFile = session_file
+        self.currentUser = None
+        self.currentCookie = None
+        self.loadSession()
 
-    def save_session(self, username, cookie):
-        with open(self.session_file, "w") as f:
+    def saveSession(self, username, cookie):
+        with open(self.sessionFile, "w") as f:
             f.write(f"{username}:{cookie}")
-        self.current_user = username
-        self.current_cookie = cookie
+        self.currentUser = username
+        self.currentCookie = cookie
 
-    def load_session(self):
-        if os.path.exists(self.session_file):
-            with open(self.session_file, "r") as f:
+    def loadSession(self):
+        if os.path.exists(self.sessionFile):
+            with open(self.sessionFile, "r") as f:
                 line = f.read().strip()
                 if ":" in line:
                     username, cookie = line.split(":", 1)
-                    self.current_user = username
-                    self.current_cookie = cookie
+                    self.currentUser = username
+                    self.currentCookie = cookie
         else:
-            self.current_user = None
-            self.current_cookie = None
+            self.currentUser = None
+            self.currentCookie = None
 
-    def clear_session(self):
-        if os.path.exists(self.session_file):
-            os.remove(self.session_file)
-        self.current_user = None
-        self.current_cookie = None
+    def clearSession(self):
+        if os.path.exists(self.sessionFile):
+            os.remove(self.sessionFile)
+        self.currentUser = None
+        self.currentCookie = None
 
     def get_current_user_from_session(self):
-        self.load_session()
-        return self.current_user
+        self.loadSession()
+        return self.currentUser
