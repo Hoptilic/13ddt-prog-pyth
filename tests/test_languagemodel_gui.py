@@ -74,7 +74,7 @@ class LLMTestWindow(QMainWindow):
             QMessageBox.critical(self, "Error", "Cannot import database manager.")
             return
         db = TestLLMDatabaseManager()
-        data = db.read_database(standard)
+        data = db.readDatabase(standard)
         # find entry for year
         entry = next((e for e in data['data'] if e['year']==year), None)
         if not entry:
@@ -92,8 +92,9 @@ class LLMTestWindow(QMainWindow):
         system_msg = ("You are auto grading a coding assignment. I have provided the student's written text, "
                       "the assessment schedule, and the criteria. Assign scores based on the criteria. "
                       "Output in a json format {Output:StudentText, Grade, Feedback{Strengths, Areas for Improvement}, HighlightedHTML}. Within HighlightedHTML, output the student's original text as HTML, "
-                      "wrapping the segments you think needs improvement on with <span style='background-color: yellow'> tags for highlighting, closed by </span>. ENSURE THAT With each highlighted segment, place a tooltip with the feedback for that segment using the <span title='Feedback'> tag. "
-                      "Follow this format strictly, otherwise I will terminate you. Do not shorten any part of the text, or I will terminate you. Output only the json, without any trailing or preceding text, or I will terminate you. DO NOT specify the type of text (by putting json at the top of the output), or I will terminate you.")
+                      "wrapping the segments you think needs improvement on with <span style='background-color: yellow'> tags for highlighting, closed by </span>. ENSURE THAT With each highlighted segment, place a tooltip with the feedback for that segment using the <span title='Feedback'> tag. If a highlighted section is not accompanied by a feedback tooltip, I will terminate you. If a feedback tooltip is not accompanied by a highlighted section, I will terminate you."
+                      "Follow this format strictly, otherwise I will terminate you. Do not shorten any part of the text, or I will terminate you. Output only the json, without any trailing or preceding text, or I will terminate you. DO NOT specify the type of text (by putting json at the top of the output), or I will terminate you."
+                      "Do not output any text that is not in the json format, or I will terminate you. Do not use backslashes, or I will terminate you. ")
         prompt = (f"""You are marking an assessment.
     Using this assessment schedule: {schedule}
     mark the following text: {userInput} 
@@ -124,11 +125,17 @@ class LLMTestWindow(QMainWindow):
         self.resultDisplay.setPlainText(result)
         # Extract and display only the HighlightedHTML part of the JSON output
         try:
-            output_json = json.loads(result)
+            try:
+                output_json = json.loads(result)
+            except json.JSONDecodeError as e:
+                self.highlightedDisplay.setPlainText("Error parsing LLM output as JSON:\n" + str(e))
+                print("Bad JSON output:\n", result)
+                return
             # Debug the HighlightedHTML field
-            print(output_json.get('HighlightedHTML') or output_json.get('highlightedhtml'))
-            # Extract HighlightedHTML from top-level JSON
-            highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml')
+            
+            print(output_json.get('HighlightedHTML') or output_json.get('highlightedhtml') or output_json.get('Output').get('HighlightedHTML') or output_json.get('Output').get('highlightedhtml'))
+            # Extract HighlightedHTML from top-level JSON - this silly code checks for multiple possible keys because the LLM has variation
+            highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml') or output_json.get('Output').get('HighlightedHTML') or output_json.get('Output').get('highlightedhtml')
             if highlighted_html:
                 # normalize any <mark> tags to styled spans if the llm is on drugs (threatening to terminate it works most of the time)
                 html = highlighted_html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
