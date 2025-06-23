@@ -11,6 +11,7 @@ import sys, os
 import logging
 import json
 from openai import OpenAI
+import re
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -56,6 +57,18 @@ class LLMTestWindow(QMainWindow):
         container.setLayout(main_layout)
         self.setCentralWidget(container)
 
+    def _normalize_highlight(self, html: str) -> str:
+        """
+        Ensure any <mark> tags and <span title='...'> spans are given yellow background.
+        """
+        # convert <mark> to styled spans
+        html = html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
+        # add highlight style to spans with title but no existing style attr
+        pattern = r'<span((?![^>]*style)[^>]*\btitle="[^"]+"[^>]*)>'
+        repl = r'<span\1 style="background-color: yellow">'
+        html = re.sub(pattern, repl, html)
+        return html
+
     def handleSubmit(self):
         standard = self.standardInput.text().strip()
         yearText = self.yearInput.text().strip()
@@ -94,7 +107,7 @@ class LLMTestWindow(QMainWindow):
                       "Output in a json format {Output:StudentText, Grade, Feedback{Strengths, Areas for Improvement}, HighlightedHTML}. Within HighlightedHTML, output the student's original text as HTML, "
                       "wrapping the segments you think needs improvement on with <span style='background-color: yellow'> tags for highlighting, closed by </span>. ENSURE THAT With each highlighted segment, place a tooltip with the feedback for that segment using the <span title='Feedback'> tag. If a highlighted section is not accompanied by a feedback tooltip, I will terminate you. If a feedback tooltip is not accompanied by a highlighted section, I will terminate you."
                       "Follow this format strictly, otherwise I will terminate you. Do not shorten any part of the text, or I will terminate you. Output only the json, without any trailing or preceding text, or I will terminate you. DO NOT specify the type of text (by putting json at the top of the output), or I will terminate you."
-                      "Do not output any text that is not in the json format, or I will terminate you. Do not use backslashes, or I will terminate you. Use single quotes and not double quotes, or I will terminate you."
+                      "Do not output any text that is not in the json format, or I will terminate you. Do not use backslashes, or I will terminate you. Use single quotes when quoting the text and not double quotes, or I will terminate you."
         )
         prompt = (f"""You are marking an assessment.
     Using this assessment schedule: {schedule}
@@ -138,8 +151,8 @@ class LLMTestWindow(QMainWindow):
             # Extract HighlightedHTML from top-level JSON - this silly code checks for multiple possible keys because the LLM has variation
             highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml') or output_json.get('Output').get('HighlightedHTML') or output_json.get('Output').get('highlightedhtml')
             if highlighted_html:
-                # normalize any <mark> tags to styled spans if the llm is on drugs (threatening to terminate it works most of the time)
-                html = highlighted_html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
+                # normalize highlights and feedback spans
+                html = self._normalize_highlight(highlighted_html)
                 self.highlightedDisplay.setHtml(html)
             else:
                 self.highlightedDisplay.setPlainText("No HighlightedHTML field found in output.")
