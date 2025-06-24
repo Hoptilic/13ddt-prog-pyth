@@ -57,13 +57,13 @@ class LLMTestWindow(QMainWindow):
         container.setLayout(main_layout)
         self.setCentralWidget(container)
 
-    def _normalize_highlight(self, html: str) -> str:
+    def normalize_highlight(self, html: str):
         """
         Ensure any <mark> tags and <span title='...'> spans are given yellow background.
         """
         # convert <mark> to styled spans
         html = html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
-        # add highlight style to spans with title but no existing style attr
+        # add highlight style to spans with title but no existing highlight stuf
         pattern = r'<span((?![^>]*style)[^>]*\btitle="[^"]+"[^>]*)>'
         repl = r'<span\1 style="background-color: yellow">'
         html = re.sub(pattern, repl, html)
@@ -152,7 +152,7 @@ class LLMTestWindow(QMainWindow):
             highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml') or output_json.get('Output').get('HighlightedHTML') or output_json.get('Output').get('highlightedhtml')
             if highlighted_html:
                 # normalize highlights and feedback spans
-                html = self._normalize_highlight(highlighted_html)
+                html = self.normalize_highlight(highlighted_html)
                 self.highlightedDisplay.setHtml(html)
             else:
                 self.highlightedDisplay.setPlainText("No HighlightedHTML field found in output.")
