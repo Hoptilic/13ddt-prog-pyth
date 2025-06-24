@@ -67,7 +67,7 @@ class FeedbackModule():
 
         # Database access
         try:
-            from test_languagemodel import TestLLMDatabaseManager
+            from tests.test_languagemodel import TestLLMDatabaseManager
         except ImportError:
             return(['Error', 'Cannot import database manager.'])
         db = TestLLMDatabaseManager()
