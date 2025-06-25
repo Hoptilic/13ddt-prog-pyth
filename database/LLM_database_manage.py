@@ -29,7 +29,7 @@ class LLMDatabaseManager:
         Initializes the LLMDatabaseManager with the path to the SQLite database.
         """        
         # Use a test db for testing purposes rn
-        self.dbPath = "./llm_testdatabase.db"
+        self.dbPath = "./database/LLM_testdatabase.db"
         self.connection = sqlite3.connect(self.dbPath)
         self.cursor = self.connection.cursor()
 
@@ -86,9 +86,10 @@ class LLMDatabaseManager:
         """
         Returns a list of all available standards in the database.
         """
-        query = 'SELECT name FROM sqlite_master WHERE type="table"'
+        query = 'SELECT name FROM sqlite_master WHERE type = "table" AND name NOT LIKE "sqlite_%";'
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
+        print(rows)
         return [row[0] for row in rows]
     
     def returnAvailableYears(self, standard):
@@ -98,6 +99,7 @@ class LLMDatabaseManager:
         query = f'SELECT DISTINCT year FROM "{standard}"'
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
+        print(rows)
         return [row[0] for row in rows]
 
     def exit(self):  # method retained but uses camelCase for consistency

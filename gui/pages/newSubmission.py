@@ -69,5 +69,7 @@ class NewSubmissionPage(QWidget):
         self.standardText.clear()
         self.standardText.addItems(aval_standard)
 
+        print("Available standards loaded:", aval_standard)
+
     def handleSubit(self):
         pass
