@@ -76,7 +76,7 @@ class NewSubmissionPage(QWidget):
         aval_years = DBMgr.returnAvailableYears(standard)
 
         self.yearText.clear()
-        self.yearText.addItems([str(year[0]) for year in aval_years])
+        self.yearText.addItems([str(year) for year in aval_years])
 
         print("Available years loaded:", aval_years)
 
