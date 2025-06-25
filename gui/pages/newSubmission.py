@@ -7,7 +7,6 @@ from PyQt6.QtCore import Qt
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from widgets.submission_individual import submissionIndividual
 from database.LLM_database_manage import LLMDatabaseManager
 
 class NewSubmissionPage(QWidget):
@@ -38,6 +37,7 @@ class NewSubmissionPage(QWidget):
         self.standardText = QComboBox()
         self.standardText.setPlaceholderText("Enter standard code (e.g., 91099)")
         self.submissionsHandlerLayout.addWidget(self.standardText, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.standardText.currentIndexChanged.connect(self.handleStandardComboboxChange)
 
         self.yearText = QComboBox()
         self.yearText.setPlaceholderText("Enter year (e.g., 2024)")
@@ -71,5 +71,20 @@ class NewSubmissionPage(QWidget):
 
         print("Available standards loaded:", aval_standard)
 
+    def loadAvailableYears(self, standard):
+        DBMgr = LLMDatabaseManager()
+        aval_years = DBMgr.returnAvailableYears(standard)
+
+        self.yearText.clear()
+        self.yearText.addItems([str(year[0]) for year in aval_years])
+
+        print("Available years loaded:", aval_years)
+
     def handleSubit(self):
         pass
+
+    def handleStandardComboboxChange(self):
+        selected_standard = self.standardText.currentText()
+        print(f"Selected standard: {selected_standard}")
+
+        self.loadAvailableYears(selected_standard)
