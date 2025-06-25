@@ -4,8 +4,6 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from ..widgets.left_nav import leftNav
-
 class AboutPage(QWidget):
     def __init__(self):
         super().__init__()
