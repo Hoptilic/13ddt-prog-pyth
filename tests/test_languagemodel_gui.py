@@ -82,7 +82,7 @@ class LLMTestWindow(QMainWindow):
             return
         # Database access
         try:
-            from test_languagemodel import TestLLMDatabaseManager
+            from tests.test_languagemodel import TestLLMDatabaseManager
         except ImportError:
             QMessageBox.critical(self, "Error", "Cannot import database manager.")
             return
