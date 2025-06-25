@@ -2,10 +2,14 @@ from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QMessageBox,
     QLabel, QPushButton, QLineEdit, QStackedWidget
 )
+import os, sys
 from PyQt6.QtCore import Qt
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from socketing.login import Login
 from socketing.cookie import CookieManager
-from socketing.session import SessionManager
+from socketing.session import SessionFileManager
 
 class LoginPage(QWidget):
     def __init__(self, event_manager=None):
@@ -13,7 +17,7 @@ class LoginPage(QWidget):
         self.event_manager = event_manager
         self.login_manager = Login()
         self.cookie_manager = CookieManager()
-        self.session_manager = SessionManager()
+        self.session_manager = SessionFileManager()
 
         self.setWindowTitle("NCAI - Login")
         self.mainLayout = QVBoxLayout()

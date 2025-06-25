@@ -81,6 +81,24 @@ class LLMDatabaseManager:
             data["data"].append(entry)
         
         return data
+    
+    def returnAvailableStandards(self):
+        """
+        Returns a list of all available standards in the database.
+        """
+        query = 'SELECT name FROM sqlite_master WHERE type="table"'
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        return [row[0] for row in rows]
+    
+    def returnAvailableYears(self, standard):
+        """
+        Returns a list of all available years for a specific standard in the database.
+        """
+        query = f'SELECT DISTINCT year FROM "{standard}"'
+        self.cursor.execute(query)
+        rows = self.cursor.fetchall()
+        return [row[0] for row in rows]
 
     def exit(self):  # method retained but uses camelCase for consistency
         """

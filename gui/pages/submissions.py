@@ -4,7 +4,10 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 
-from ..widgets.submission_individual import submissionIndividual
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from widgets.submission_individual import submissionIndividual
 
 class SubmissionsPage(QWidget):
     def __init__(self):

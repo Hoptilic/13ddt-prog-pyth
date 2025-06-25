@@ -64,6 +64,7 @@ from gui.pages.about import AboutPage
 from gui.pages.user import UserPage
 from gui.pages.login import LoginPage
 from gui.pages.submissions import SubmissionsPage
+from gui.pages.newSubmission import NewSubmissionPage
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox, QMainWindow
 from PyQt6.QtCore import Qt
 import logging
@@ -103,6 +104,13 @@ class testSubmissionSize(QMainWindow):
         self.resize(1440, 900)
         self.setCentralWidget(SubmissionsPage())
 
+class testNewSubmissionSize(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("NCAI")
+        self.resize(1440, 900)
+        self.setCentralWidget(NewSubmissionPage())
+
 class PageTester(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -136,7 +144,11 @@ class PageTester(QMainWindow):
         self.userBtn = QPushButton("Test Submission Page")
         self.userBtn.clicked.connect(self.testSubmissionPage)
         layout.addWidget(self.userBtn)
-        
+
+        self.newSubmissionBtn = QPushButton("Test New Submission Page")
+        self.newSubmissionBtn.clicked.connect(self.testNewSubmissionPage)
+        layout.addWidget(self.newSubmissionBtn)
+
         self.testAllBtn = QPushButton("Test All Pages")
         self.testAllBtn.clicked.connect(self.testAllPages)
         layout.addWidget(self.testAllBtn)
@@ -187,13 +199,24 @@ class PageTester(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open Submissions Page: {str(e)}")
             logging.error(f"Failed to open Submissions Page: {str(e)}")
-    
+
+    def testNewSubmissionPage(self):
+        try:
+            window = testNewSubmissionSize()
+            window.show()
+            self.openWindows.append(window)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open New Submission Page: {str(e)}")
+            logging.error(f"Failed to open New Submission Page: {str(e)}")
+
     def testAllPages(self):
         self.testHomePage()
         self.testAboutPage()
         self.testUserPage()
         self.testLoginPage()
         self.testSubmissionPage()
+        self.testNewSubmissionPage()
+
 
 app = QApplication(sys.argv)
 window = PageTester()
