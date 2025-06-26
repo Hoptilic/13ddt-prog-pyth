@@ -1,17 +1,21 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QTextEdit, QComboBox
+    QLabel, QPushButton, QTextEdit, QComboBox, QMessageBox
 )
 from PyQt6.QtCore import Qt
 
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from llm.socketing.handle import FeedbackModule
 from database.LLM_database_manage import LLMDatabaseManager
+
+import json
 
 class NewSubmissionPage(QWidget):
     def __init__(self):
         super().__init__()
+        self.feedback_module = FeedbackModule()
 
         self.setWindowTitle("NCAI - New Submission")
         
@@ -42,9 +46,11 @@ class NewSubmissionPage(QWidget):
         self.yearText = QComboBox()
         self.yearText.setPlaceholderText("Enter year (e.g., 2024)")
         self.submissionsHandlerLayout.addWidget(self.yearText, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.yearText.currentIndexChanged.connect(self.handleYearComboboxChange)
 
         self.ghostText = QTextEdit()
         self.ghostText.setPlaceholderText("This movie, Mad Max, isd irected by...")
+        self.ghostText.setDisabled(True)
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.submitButton = QPushButton("Submit")
@@ -81,10 +87,59 @@ class NewSubmissionPage(QWidget):
         print("Available years loaded:", aval_years)
 
     def handleSubit(self):
-        pass
+        standard = self.standardText.currentText().strip()
+        yearText = self.yearText.currentText().strip()
+        userInput = self.ghostText.toPlainText().strip()
+        
+        if not standard or not yearText:
+            QMessageBox.warning(self, "Input Error", "Please enter both standard and year.")
+            return
+        try:
+            year = int(yearText)
+        except ValueError:
+            QMessageBox.warning(self, "Input Error", "Year must be a number.")
+            return
+        if not userInput:
+            QMessageBox.warning(self, "Input Error", "Please enter student work.")
+            return
+            
+        # Use the FeedbackModule to handle the submission
+        try:
+            result = self.feedback_module.handleFullSubmission(
+                standard=standard, 
+                year=year, 
+                userInput=userInput
+            )
+            
+            # Check if result is an error list
+            if isinstance(result, list) and len(result) >= 2:
+                QMessageBox.critical(self, result[0], result[1])
+                return
+                
+            # Display raw feedback
+            # self.resultDisplay.setPlainText(json.dumps(result, indent=2))
+            
+            # Extract and display highlighted HTML
+            try:
+                highlighted_html = self.feedback_module.returnHighlightedHTML(result)
+                if highlighted_html and not highlighted_html.startswith("Error:"):
+                    self.ghostText.setHtml(highlighted_html)
+                else:
+                    self.ghostText.setPlainText(highlighted_html or "No highlighted HTML available.")
+            except Exception as e:
+                self.ghostText.setPlainText(f"Error extracting highlighted HTML: {str(e)}")
+                
+        except Exception as ex:
+            QMessageBox.critical(self, "Processing Error", str(ex))
 
     def handleStandardComboboxChange(self):
         selected_standard = self.standardText.currentText()
         print(f"Selected standard: {selected_standard}")
 
         self.loadAvailableYears(selected_standard)
+
+    def handleYearComboboxChange(self):
+        selected_year = self.yearText.currentText()
+        print(f"Selected year: {selected_year}")
+
+        self.ghostText.setEnabled(True)
