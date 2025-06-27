@@ -123,6 +123,5 @@ class FeedbackModule():
             output_json = json.loads(result)
             return output_json
         except json.JSONDecodeError as e:
-            self.resultDisplay.setPlainText("Error parsing LLM output as JSON:\n" + str(e))
             print("Bad JSON output:\n", result)
             return(['JSON Error', str(e)])

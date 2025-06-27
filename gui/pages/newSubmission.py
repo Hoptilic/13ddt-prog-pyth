@@ -111,6 +111,8 @@ class NewSubmissionPage(QWidget):
                 year=year, 
                 userInput=userInput
             )
+
+            print(result)
             
             # Check if result is an error list
             if isinstance(result, list) and len(result) >= 2:
@@ -123,6 +125,7 @@ class NewSubmissionPage(QWidget):
             # Extract and display highlighted HTML
             try:
                 highlighted_html = self.feedback_module.returnHighlightedHTML(result)
+                print(highlighted_html)
                 if highlighted_html and not highlighted_html.startswith("Error:"):
                     self.ghostText.setHtml(highlighted_html)
                 else:
