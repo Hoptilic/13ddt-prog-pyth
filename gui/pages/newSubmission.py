@@ -51,6 +51,7 @@ class NewSubmissionPage(QWidget):
         self.ghostText = QTextEdit()
         self.ghostText.setPlaceholderText("This movie, Mad Max, isd irected by...")
         self.ghostText.setDisabled(True)
+        self.ghostText.document().documentLayout().documentSizeChanged.connect(self.update_ghostTextSize)
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.submitButton = QPushButton("Submit")
@@ -143,3 +144,22 @@ class NewSubmissionPage(QWidget):
         print(f"Selected year: {selected_year}")
 
         self.ghostText.setEnabled(True)
+
+    def update_ghostTextSize(self):
+        doc_size = self.ghostText.document().size()
+        
+        parent_size = self.size()
+        max_width = parent_size.width() - 100
+        max_height = parent_size.height() - 200 
+        
+        desired_width = min(int(doc_size.width()) + 40, max_width)
+        desired_height = min(int(doc_size.height()) + 40, max_height)
+        
+        # Ensure minimum size
+        min_width = 300
+        min_height = 100
+        
+        self.ghostText.setMinimumWidth(max(desired_width, min_width))
+        self.ghostText.setMaximumWidth(max_width)
+        self.ghostText.setMinimumHeight(max(desired_height, min_height))
+        self.ghostText.setMaximumHeight(max_height)
