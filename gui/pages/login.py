@@ -179,17 +179,38 @@ class RegisterFrame(QWidget):
         self.setLayout(self.registerLayout)
 
     def register_user(self):
-        users = self.login_manager.load_users()
-        self.cookie_manager.createJar()
+        self.cookie_manager.createJar() # Always create the jar, even if the login fails, so that it atleast exists (part of app init)
 
         username = self.usernameEntry.text()
-        if username in users:
+
+        if self.login_manager.verify_user(username):
             QMessageBox.critical(self, "Error", "User already exists.")
             return
+                    
         try:
             if self.login_manager.validate(self.passwordEntry.text()):
                 salt, key = self.login_manager.encrypt(self.passwordEntry.text())
-                self.login_manager.save_user(username, salt, key)
-                QMessageBox.information(self, "Success", "User registered!")
+                if self.login_manager.register_user(username, key, salt):
+                    QMessageBox.information(self, "Success", "User registered successfully!")
+                    self.parent.showLoginFrame()
+                else:
+                    QMessageBox.critical(self, "Error", "Failed to register user.")
+            else:
+                QMessageBox.critical(self, "Error", "Password does not meet complexity requirements.")
         except Exception as e:
             QMessageBox.critical(self, "Error", str(e))
+
+        # users = self.login_manager.load_users()
+        # self.cookie_manager.createJar()
+
+        # username = self.usernameEntry.text()
+        # if username in users:
+        #     QMessageBox.critical(self, "Error", "User already exists.")
+        #     return
+        # try:
+        #     if self.login_manager.validate(self.passwordEntry.text()):
+        #         salt, key = self.login_manager.encrypt(self.passwordEntry.text())
+        #         self.login_manager.save_user(username, salt, key)
+        #         QMessageBox.information(self, "Success", "User registered!")
+        # except Exception as e:
+        #     QMessageBox.critical(self, "Error", str(e))

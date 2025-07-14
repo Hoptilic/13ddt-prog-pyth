@@ -4,8 +4,11 @@ from PyQt6.QtWidgets import (
 )
 
 from PyQt6.QtCore import Qt
+import os, sys
 
-from socketing.session import SessionManager
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from socketing.session import SessionFileManager
 
 class AccountWidget(QWidget):
     """
@@ -14,7 +17,7 @@ class AccountWidget(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.session_manager = SessionManager()
+        self.session_manager = SessionFileManager()
 
         self.setWindowTitle("Recent Submissions")
 
