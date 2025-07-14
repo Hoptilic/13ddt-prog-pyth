@@ -1,8 +1,12 @@
 import hashlib
-import os
+import os, sys
 import re
 
-class Login():
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from database.login_manage import LoginDBManager
+
+class Login(LoginDBManager):
     """
     This class handles the login functionality.
     It includes methods for encrypting and decrypting passwords.
@@ -71,18 +75,18 @@ class Login():
 
     # Temporarily use text files until a database is implemented
 
-    def save_user(self, username, salt, key):
-        USER_FILE = "users.txt"
-        with open(USER_FILE, "a") as f:
-            f.write(f"{username}:{salt}:{key}\n")
+    # def save_user(self, username, salt, key):
+    #     USER_FILE = "users.txt"
+    #     with open(USER_FILE, "a") as f:
+    #         f.write(f"{username}:{salt}:{key}\n")
 
-    def load_users(self):
-        users = {}
-        USER_FILE = "users.txt"
-        if os.path.exists(USER_FILE):
-            with open(USER_FILE, "r") as f:
-                for line in f:
-                    parts = line.strip().split(":")
-                    if len(parts) == 3:
-                        users[parts[0]] = (parts[1], parts[2])
-        return users
+    # def load_users(self):
+    #     users = {}
+    #     USER_FILE = "users.txt"
+    #     if os.path.exists(USER_FILE):
+    #         with open(USER_FILE, "r") as f:
+    #             for line in f:
+    #                 parts = line.strip().split(":")
+    #                 if len(parts) == 3:
+    #                     users[parts[0]] = (parts[1], parts[2])
+    #     return users

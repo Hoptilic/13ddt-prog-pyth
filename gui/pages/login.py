@@ -99,12 +99,12 @@ class LoginFrame(QWidget):
         self.setLayout(self.loginLayout)
 
     def login_user(self):
-        users = self.login_manager.load_users()
-        self.cookie_manager.createJar()
+        self.cookie_manager.createJar() # Always create the jar, even if the login fails, so that it atleast exists (part of app init)
 
         username = self.usernameEntry.text()
-        if username in users:
-            salt, key = users[username]
+
+        if self.login_manager.verify_user(username):
+            salt, key = self.login_manager.retrieve_salt(username), self.login_manager.retrieve_key(username)
             try:
                 if self.login_manager.unencrypt(self.passwordEntry.text(), salt, key):
                     current_cookie = self.cookie_manager.bake()
@@ -119,6 +119,28 @@ class LoginFrame(QWidget):
                 QMessageBox.critical(self, "Error", str(e))
         else:
             QMessageBox.critical(self, "Error", "User not found.")
+
+
+        # users = self.login_manager.load_users()
+        # self.cookie_manager.createJar()
+
+        # username = self.usernameEntry.text()
+        # if username in users:
+        #     salt, key = users[username]
+        #     try:
+        #         if self.login_manager.unencrypt(self.passwordEntry.text(), salt, key):
+        #             current_cookie = self.cookie_manager.bake()
+        #             self.loginButton.setEnabled(False)
+        #             self.session_manager.save_session(username, current_cookie)
+        #             if self.event_manager:
+        #                 self.event_manager.login_success.emit(username)
+        #             QMessageBox.information(self, "Success", "Login successful! Session started.")
+        #         else:
+        #             QMessageBox.critical(self, "Error", "Incorrect password.")
+        #     except Exception as e:
+        #         QMessageBox.critical(self, "Error", str(e))
+        # else:
+        #     QMessageBox.critical(self, "Error", "User not found.")
 
 class RegisterFrame(QWidget):
     def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None):
