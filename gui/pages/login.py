@@ -8,6 +8,7 @@ from PyQt6.QtCore import Qt
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from socketing.login import Login
+from database.login_manage import LoginDBManager
 from socketing.cookie import CookieManager
 from socketing.session import SessionFileManager
 
@@ -18,6 +19,7 @@ class LoginPage(QWidget):
         self.login_manager = Login()
         self.cookie_manager = CookieManager()
         self.session_manager = SessionFileManager()
+        self.logindb = LoginDBManager()
 
         self.setWindowTitle("NCAI - Login")
         self.mainLayout = QVBoxLayout()
@@ -40,8 +42,8 @@ class LoginPage(QWidget):
 
         self.initFrame.setLayout(self.initLayout)
 
-        self.loginFrame = LoginFrame(self, self.event_manager, self.login_manager, self.cookie_manager, self.session_manager)
-        self.registerFrame = RegisterFrame(self, self.event_manager, self.login_manager, self.cookie_manager, self.session_manager)
+        self.loginFrame = LoginFrame(self, self.event_manager, self.login_manager, self.cookie_manager, self.session_manager, self.logindb)
+        self.registerFrame = RegisterFrame(self, self.event_manager, self.login_manager, self.cookie_manager, self.session_manager, self.logindb)
 
         self.stackedWidget.addWidget(self.initFrame)
         self.stackedWidget.addWidget(self.loginFrame)
@@ -63,13 +65,14 @@ class LoginPage(QWidget):
         self.stackedWidget.setCurrentIndex(0)
 
 class LoginFrame(QWidget):
-    def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None):
+    def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None, logindb = None):
         super().__init__()
         self.parent = parent
         self.event_manager = event_manager
         self.login_manager = login_manager
         self.cookie_manager = cookie_manager
         self.session_manager = session_manager
+        self.logindb = logindb
 
         self.loginLayout = QVBoxLayout()
 
@@ -103,8 +106,8 @@ class LoginFrame(QWidget):
 
         username = self.usernameEntry.text()
 
-        if self.login_manager.verify_user(username):
-            salt, key = self.login_manager.retrieve_salt(username), self.login_manager.retrieve_key(username)
+        if self.logindb.verify_user(username):
+            salt, key = self.logindb.retrieve_salt(username), self.logindb.retrieve_key(username)
             try:
                 if self.login_manager.unencrypt(self.passwordEntry.text(), salt, key):
                     current_cookie = self.cookie_manager.bake()
@@ -143,13 +146,14 @@ class LoginFrame(QWidget):
         #     QMessageBox.critical(self, "Error", "User not found.")
 
 class RegisterFrame(QWidget):
-    def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None):
+    def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None, logindb=None):
         super().__init__()
         self.parent = parent
         self.event_manager = event_manager
         self.login_manager = login_manager
         self.cookie_manager = cookie_manager
         self.session_manager = session_manager
+        self.logindb = logindb
 
         self.registerLayout = QVBoxLayout()
 
@@ -183,14 +187,14 @@ class RegisterFrame(QWidget):
 
         username = self.usernameEntry.text()
 
-        if self.login_manager.verify_user(username):
+        if self.logindb.verify_user(username):
             QMessageBox.critical(self, "Error", "User already exists.")
             return
                     
         try:
             if self.login_manager.validate(self.passwordEntry.text()):
                 salt, key = self.login_manager.encrypt(self.passwordEntry.text())
-                if self.login_manager.register_user(username, key, salt):
+                if self.logindb.register_user(username, key, salt):
                     QMessageBox.information(self, "Success", "User registered successfully!")
                     self.parent.showLoginFrame()
                 else:

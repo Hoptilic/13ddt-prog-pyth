@@ -4,9 +4,7 @@ import re
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from database.login_manage import LoginDBManager
-
-class Login(LoginDBManager):
+class Login():
     """
     This class handles the login functionality.
     It includes methods for encrypting and decrypting passwords.
