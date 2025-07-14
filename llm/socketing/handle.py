@@ -32,6 +32,9 @@ class FeedbackModule():
         """
         Ensure any <mark> tags and <span title='...'> spans are given yellow background.
         """
+
+        # convert <span title='...'> to styled spans
+        html = re.sub(r'<span\s+title="([^"]+)"\s*>(.*?)</span>', r"<span style='background-color: yellow' title='\1'>\2</span>", html, flags=re.DOTALL)
         # convert <mark> to styled spans
         html = html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
         # add highlight style to spans with title but no existing highlight stuf
