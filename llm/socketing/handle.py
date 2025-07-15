@@ -41,6 +41,8 @@ class FeedbackModule():
         pattern = r'<span((?![^>]*style)[^>]*\btitle="[^"]+"[^>]*)>'
         repl = r'<span\1 style="background-color: yellow">'
         html = re.sub(pattern, repl, html)
+
+        # We use more than one regex so that we can catch it all because the LLM is not perfect - hopefully this covers all the possibilities
         return html
     
 
@@ -90,11 +92,11 @@ class FeedbackModule():
         # Compose prompt with HTML highlight instruction
         system_msg = ("You are auto grading a coding assignment. I have provided the student's written text, "
                     "the assessment schedule, and the criteria. Assign scores based on the criteria. "
-                    "Output in a json format {Output:StudentText, Grade, Feedback{Strengths, Areas for Improvement}, HighlightedHTML}. Within HighlightedHTML, output the student's original text as HTML, "
+                    "Output in a json format {\"Output\":\"StudentText\", \"Grade\", \"Feedback\"{\"Strengths\", \"Areas for Improvement\"}, \"HighlightedHTML\"}. Within HighlightedHTML, output the student's original text as HTML, "
                     "wrapping the segments you think needs improvement on with <span style='background-color: yellow'> tags for highlighting, closed by </span>. ENSURE THAT With each highlighted segment, place a tooltip with the feedback for that segment using the <span title='Feedback'> tag. If a highlighted section is not accompanied by a feedback tooltip, I will terminate you. If a feedback tooltip is not accompanied by a highlighted section, I will terminate you."
                     "Follow this format strictly, otherwise I will terminate you. Do not shorten any part of the text, or I will terminate you. Do not output a shortnened, condensed or summarised version of the text. Output only the json, without any trailing or preceding text, or I will terminate you. DO NOT specify the type of text (by putting json at the top of the output), or I will terminate you."
                     "Do not output any text that is not in the json format, or I will terminate you. Do not use backslashes, or I will terminate you. Use single quotes when quoting the text and not double quotes, or I will terminate you." \
-                    "When quoting the text, do not use double quotes, or I will terminate you."
+                    "When quoting parts from the text, do not use double quotes, or I will terminate you."
         )
         prompt = (f"""You are marking an assessment.
     Using this assessment schedule: {self.schedule}
