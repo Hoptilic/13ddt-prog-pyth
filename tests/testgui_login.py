@@ -1,18 +1,21 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QMessageBox
 import sys
 import os
-from socketing.login import Login
-from socketing.cookie import CookieManager
-from socketing.session import SessionManager
 
-session_manager = SessionManager()
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from socketing.login import Login
+from database.login_manage import LoginDBManager
+from socketing.cookie import CookieManager
+from socketing.session import SessionFileManager
+
+session_manager = SessionFileManager()
 
 class LoginApp(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Login GUI")
         self.login = Login()
-        self.users = self.login.load_users()
+        self.logindb = LoginDBManager()
         self.cookie_manager = CookieManager()
         self.cookie_manager.createJar()
         self.current_cookie = None
@@ -72,16 +75,29 @@ class LoginApp(QWidget):
                 QMessageBox.information(self, "Welcome back", f"Auto-logged in as {username}!")
             else:
                 print(f"[DEBUG] Cookie {cookie} not found or invalid.")
-        else:
             print("[DEBUG] No session file or session data found.")
 
     def login_user(self):
         username = self.username_entry.text()
         password = self.password_entry.text()
-        if username in self.users:
-            salt, key = self.users[username]
-            try:
-                if self.login.unencrypt(password, salt, key):
+        
+        if not username or not password:
+            QMessageBox.critical(self, "Error", "Please enter both username and password.")
+            return
+            
+        # Check if user exists in database
+        if not self.logindb.verify_user(username):
+            QMessageBox.critical(self, "Error", "User not found.")
+            return
+            
+        try:
+            # Get salt and hashed password from database
+            salt = self.logindb.retrieve_salt(username)
+            stored_key = self.logindb.retrieve_key(username)
+            
+            if salt and stored_key:
+                # Verify password using login system
+                if self.login.unencrypt(password, salt, stored_key):
                     self.current_cookie = self.cookie_manager.bake()
                     self.current_user = username
                     self.session_manager.save_session(username, self.current_cookie)
@@ -92,25 +108,37 @@ class LoginApp(QWidget):
                     QMessageBox.information(self, "Success", "Login successful! Session started.")
                 else:
                     QMessageBox.critical(self, "Error", "Incorrect password.")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", str(e))
-        else:
-            QMessageBox.critical(self, "Error", "User not found.")
-
-    def register_user(self):
+            else:
+                QMessageBox.critical(self, "Error", "Unable to retrieve user credentials.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Login error: {str(e)}")
+            
         username = self.username_entry.text()
         password = self.password_entry.text()
-        if username in self.users:
+        
+        if not username or not password:
+            QMessageBox.critical(self, "Error", "Please enter both username and password.")
+            return
+            
+        # Check if user already exists
+        if self.logindb.verify_user(username):
             QMessageBox.critical(self, "Error", "User already exists.")
             return
+            
         try:
+            # Validate password and encrypt it
             if self.login.validate(password):
-                salt, key = self.login.encrypt(password)
-                self.login.save_user(username, salt, key)
-                self.users = self.login.load_users()
-                QMessageBox.information(self, "Success", "User registered!")
+                salt, hashed_password = self.login.encrypt(password)
+                
+                # Register user in database
+                if self.logindb.register_user(username, hashed_password, salt):
+                    QMessageBox.information(self, "Success", "User registered successfully!")
+                else:
+                    QMessageBox.critical(self, "Error", "Failed to register user.")
+            else:
+                QMessageBox.critical(self, "Error", "Password does not meet requirements.")
         except Exception as e:
-            QMessageBox.critical(self, "Error", str(e))
+            QMessageBox.critical(self, "Error", f"Registration error: {str(e)}")
 
     def logout_user(self):
         if self.current_cookie:
