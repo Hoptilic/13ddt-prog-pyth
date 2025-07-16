@@ -1,0 +1,24 @@
+/* ---------- FRAMES ---------- */
+#rightFrame,
+#submissionsHandlerFrame{
+    background:#ffffff;
+    border:1px solid #d0d8e8;
+    border-radius:12px;
+    margin:10px;
+}
+
+#rightFrame{
+    padding:20px;
+}
+
+#submissionsHandlerFrame{
+    padding:30px;
+}
+
+/* ---------- TITLE ---------- */
+QLabel[text="Create a new submission"]{
+    font-size:24px;
+    font-weight:600;
+    color:#34495e;
+    margin-bottom:20px;
+}

@@ -1,0 +1,76 @@
+/* qt-stylesheet */
+
+/* ---------- GENERAL ---------- */
+QWidget{
+    background:#f5f7fa;
+    font-family:"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size:14px;
+    color:#2c3e50;
+}
+
+/* ---------- BUTTON ---------- */
+QPushButton{
+    min-height:38px;
+    min-width:120px;
+    background:qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                               stop:0 #4facfe, stop:1 #00f2fe);
+    color:#ffffff;
+    font-weight:600;
+    border:none;
+    border-radius:8px;
+    padding:0 20px;
+}
+QPushButton:hover{
+    background:qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                               stop:0 #5cb3fe, stop:1 #1af3ff);
+}
+QPushButton:pressed{
+    background:qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                               stop:0 #3a9bfe, stop:1 #00d9f5);
+}
+
+/* ---------- COMBOBOX ---------- */
+QComboBox{
+    min-height:36px;
+    padding:4px 12px 4px 12px;
+    border:1px solid #c3cfd9;
+    border-radius:8px;
+    background:#ffffff;
+    selection-background-color:#e3ebf5;
+}
+QComboBox:hover{
+    border-color:#3498db;
+}
+QComboBox::drop-down{
+    border:none;
+    width:24px;
+}
+QComboBox::down-arrow{
+    image:url(:icons/chevron-down);
+    width:12px;
+    height:12px;
+}
+QComboBox QAbstractItemView{
+    border:1px solid #c3cfd9;
+    border-radius:8px;
+    background:#ffffff;
+    selection-background-color:#e3ebf5;
+    outline:none;
+}
+
+/* ---------- TEXT EDIT ---------- */
+QTextEdit{
+    border:1px solid #c3cfd9;
+    border-radius:8px;
+    padding:8px;
+    background:#ffffff;
+    selection-background-color:#e3ebf5;
+}
+QTextEdit:focus{
+    border:1px solid #3498db;
+}
+
+/* ---------- MESSAGE BOX ---------- */
+QMessageBox{
+    background:#ffffff;
+}
