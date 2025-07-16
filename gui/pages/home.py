@@ -26,27 +26,19 @@ class HomePage(QWidget):
         self.rightFrame.setStyleSheet("#rightFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
         #\
 
-        self.title = QLabel("What will we be writing about today?")
+        self.title = QLabel("What will we be doing today?")
         self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.selectionFrame = QWidget()
         self.selectionLayout = QVBoxLayout()
 
-        self.standardText = QLineEdit()
-        self.standardText.setPlaceholderText("Enter standard code (e.g., 91099)")
-        self.selectionLayout.addWidget(self.standardText, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.previousButton = QPushButton("View Past Submissions")
+        self.selectionLayout.addWidget(self.previousButton, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.previousButton.clicked.connect(self.handlePreviousSubmissions)
 
-        self.yearText = QLineEdit()
-        self.yearText.setPlaceholderText("Enter year (e.g., 2024)")
-        self.selectionLayout.addWidget(self.yearText, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.ghostText = QTextEdit()
-        self.ghostText.setPlaceholderText("This movie, Mad Max, isd irected by...")
-        self.selectionLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.submitButton = QPushButton("Submit")
+        self.submitButton = QPushButton("Create New Submission")
         self.selectionLayout.addWidget(self.submitButton, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.submitButton.clicked.connect(self.handleSubit)
+        self.submitButton.clicked.connect(self.handleSubmit)
 
         self.selectionFrame.setLayout(self.selectionLayout)
         self.rightLayout.addWidget(self.selectionFrame, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -58,5 +50,9 @@ class HomePage(QWidget):
         self.setLayout(self.mainLayout)
 
 
-    def handleSubit(self):
+    def handleSubmit(self):
+        pass
+
+
+    def handlePreviousSubmissions(self):
         pass

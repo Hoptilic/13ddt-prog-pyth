@@ -112,7 +112,7 @@ class LoginFrame(QWidget):
                 if self.login_manager.unencrypt(self.passwordEntry.text(), salt, key):
                     current_cookie = self.cookie_manager.bake()
                     self.loginButton.setEnabled(False)
-                    self.session_manager.save_session(username, current_cookie)
+                    self.session_manager.saveSession(username, current_cookie)
                     if self.event_manager:
                         self.event_manager.login_success.emit(username)
                     QMessageBox.information(self, "Success", "Login successful! Session started.")
