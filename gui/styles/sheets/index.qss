@@ -2,8 +2,8 @@
 
 /* ---------- GENERAL ---------- */
 QWidget{
-    background:#f5f7fa;
-    font-family:"Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background:#140956;
+    font-family:"Inter", Roboto, Helvetica, Arial, sans-serif;
     font-size:14px;
     color:#2c3e50;
 }
@@ -12,34 +12,27 @@ QWidget{
 QPushButton{
     min-height:38px;
     min-width:120px;
-    background:qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                               stop:0 #4facfe, stop:1 #00f2fe);
-    color:#ffffff;
+    background:#ab150956;
     font-weight:600;
     border:none;
     border-radius:8px;
     padding:0 20px;
-}
-QPushButton:hover{
-    background:qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                               stop:0 #5cb3fe, stop:1 #1af3ff);
-}
-QPushButton:pressed{
-    background:qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                               stop:0 #3a9bfe, stop:1 #00d9f5);
+    border:1px solid #000000;
+    color:#ffffff;
 }
 
 /* ---------- COMBOBOX ---------- */
 QComboBox{
     min-height:36px;
     padding:4px 12px 4px 12px;
-    border:1px solid #c3cfd9;
+    border:1px solid #000000;
     border-radius:8px;
-    background:#ffffff;
-    selection-background-color:#e3ebf5;
+    background:#140956;
+    selection-background-color:#140956;
+    color:#ffffff;
 }
 QComboBox:hover{
-    border-color:#3498db;
+    border-color:#000000;
 }
 QComboBox::drop-down{
     border:none;
@@ -51,26 +44,51 @@ QComboBox::down-arrow{
     height:12px;
 }
 QComboBox QAbstractItemView{
-    border:1px solid #c3cfd9;
+    border:1px solid #000000;
     border-radius:8px;
-    background:#ffffff;
+    background:#140956;
     selection-background-color:#e3ebf5;
     outline:none;
+    color:#ffffff;
 }
 
 /* ---------- TEXT EDIT ---------- */
 QTextEdit{
-    border:1px solid #c3cfd9;
+    border:1px solid #000000;
     border-radius:8px;
     padding:8px;
-    background:#ffffff;
     selection-background-color:#e3ebf5;
+    color:#ffffff;
 }
 QTextEdit:focus{
     border:1px solid #3498db;
 }
 
+/* ---------- LINE EDIT ---------- */
+QLineEdit{
+    border:1px solid #000000;
+    border-radius:8px;
+    padding:4px 12px;
+    selection-background-color:#e3ebf5;
+    color:#ffffff;
+}
+
 /* ---------- MESSAGE BOX ---------- */
 QMessageBox{
-    background:#ffffff;
+    background:#140956;
+    border:1px solid #000000;
+}
+
+QLabel{
+    color:#ffffff;
+}
+
+QMainWindow{
+    background:#140956;
+    color:#ffffff;
+}
+
+QStackedWidget{
+    background:#140956;
+    color:#ffffff;
 }

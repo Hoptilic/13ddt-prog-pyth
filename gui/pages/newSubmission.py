@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from llm.socketing.handle import FeedbackModule
 from database.LLM_database_manage import LLMDatabaseManager
+import gui.styles.sheets as sheets
 
 import json
 
@@ -26,8 +27,6 @@ class NewSubmissionPage(QWidget):
         self.rightFrame.setObjectName("rightFrame")
         self.rightLayout = QVBoxLayout()
 
-        self.rightFrame.setStyleSheet("#rightFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
-
         self.title = QLabel("Create a new submission")
         self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
         #\
@@ -36,7 +35,6 @@ class NewSubmissionPage(QWidget):
         self.submissionsHandlerFrame = QWidget()
         self.submissionsHandlerLayout = QVBoxLayout()   
         self.submissionsHandlerFrame.setObjectName("submissionsHandlerFrame")
-        self.submissionsHandlerFrame.setStyleSheet("#submissionsHandlerFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
 
         self.standardText = QComboBox()
         self.standardText.setPlaceholderText("Enter standard code (e.g., 91099)")
@@ -68,6 +66,13 @@ class NewSubmissionPage(QWidget):
 
         self.loadAvailableStandards()
         self.setLayout(self.mainLayout)
+
+        current_dir = os.path.dirname(__file__)
+        assets = os.path.join(current_dir, '..', 'styles', 'sheets')
+
+        page_ss = self.load_qss(os.path.join(assets, "submissions.qss"), "submissions.qss")
+
+        self.setStyleSheet(page_ss)
 
     def loadAvailableStandards(self):
         DBMgr = LLMDatabaseManager()
@@ -166,3 +171,14 @@ class NewSubmissionPage(QWidget):
         self.ghostText.setMaximumWidth(max_width)
         self.ghostText.setMinimumHeight(max(desired_height, min_height))
         self.ghostText.setMaximumHeight(max_height)
+
+    def load_qss(self, path, name):
+        """
+        Load a QSS file and return its content.
+        """
+        try:
+            with open(path, 'r') as file:
+                return file.read()
+        except Exception as e:
+            print(f"Error loading QSS file {name}: {str(e)}")
+            return ""

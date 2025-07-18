@@ -20,7 +20,6 @@ from PyQt6.QtCore import Qt, pyqtSignal, QObject
 from gui.pages import *
 from gui.widgets import *
 import gui.widgets as widgets
-import gui.styles as styles
 
 class EventManager(QObject):
     """
@@ -46,6 +45,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("NCAI")
         self.resize(1440, 900)
         self.event_manager = EventManager()
+
+        # Load global stylesheet like in newSubmission.py
+        current_dir = os.path.dirname(__file__)
+        assets = os.path.join(current_dir, 'gui', 'styles', 'sheets')
+        global_ss = self.load_qss(os.path.join(assets, "index.qss"), "index.qss")
+        self.setStyleSheet(global_ss)
 
         # At some point make another widget so that the left_nav is loaded once at the start of the program instead of in each page
         self.main_frame = QWidget()
@@ -95,6 +100,17 @@ class MainWindow(QMainWindow):
                     self.main_layout.insertWidget(0, left_nav.leftNav(), 1, alignment=Qt.AlignmentFlag.AlignLeft)
         else:
             logging.error(f"Page '{page_name}' does not exist.")
+
+    def load_qss(self, path, name):
+        """
+        Load a QSS file and return its content.
+        """
+        try:
+            with open(path, 'r') as file:
+                return file.read()
+        except Exception as e:
+            print(f"Error loading QSS file {name}: {str(e)}")
+            return ""
 
 # Run the app
 app = QApplication(sys.argv)
