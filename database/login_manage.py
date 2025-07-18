@@ -2,7 +2,7 @@ import sqlite3
 
 class LoginDBManager():
     '''
-    A class to manage the login database, including user authentication and registration.
+    A class to manage the login database, including verifying user existence and registration.
     '''
 
     def __init__(self, db_path="./database/login.db"):
