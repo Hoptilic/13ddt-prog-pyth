@@ -31,6 +31,7 @@ class EventManager(QObject):
     logout = pyqtSignal() # emits nothing (logout doesnt need anything passed, maybe?)
     register_success = pyqtSignal(str)  # emits username
     switch_page = pyqtSignal(str)  # emits page name
+    newSubmission = pyqtSignal()  # emits nothing, used to switch to new submission page
 
     def __init__(self):
         super().__init__()
@@ -52,22 +53,25 @@ class MainWindow(QMainWindow):
         self.main_frame.setLayout(self.main_layout)
 
         self.stacked_widget = QStackedWidget()
-        self.main_layout.addWidget(self.stacked_widget, 3)
+        self.main_layout.insertWidget(1, self.stacked_widget, 3)
         self.setCentralWidget(self.main_frame)
 
         self.pages = {
-            "home": home.HomePage(),
+            "home": home.HomePage(event_manager=self.event_manager),
             "about": about.AboutPage(),
             "login": login.LoginPage(event_manager=self.event_manager),
+            "newSubmission": newSubmission.NewSubmissionPage(),
             #"submissions": submissions.SubmissionsPage(),
             "user": user.UserPage()
         }
 
+        # Adds each page at index 1 to make space for the leftnav
         for page in self.pages.values():
             self.stacked_widget.addWidget(page)
 
         # Connect event manager signals to slots
         self.event_manager.login_success.connect(lambda username: self.switch_page("home"))
+        self.event_manager.newSubmission.connect(lambda: self.switch_page("newSubmission"))
         self.event_manager.switch_page.connect(self.switch_page)
 
         # This behaviour will change as the login page will be skipped if the user is already signed in
@@ -86,7 +90,9 @@ class MainWindow(QMainWindow):
                 self.main_layout.removeWidget(self.main_layout.itemAt(0).widget())
             else:
                 self.stacked_widget.setCurrentWidget(self.pages[page_name])
-                self.main_layout.insertWidget(0, left_nav.leftNav(), 1, alignment=Qt.AlignmentFlag.AlignLeft)
+                # Only insert the left navigation if it is not already there based on the name of the leftnav
+                if not isinstance(self.main_layout.itemAt(0).widget(), type(left_nav.leftNav())):
+                    self.main_layout.insertWidget(0, left_nav.leftNav(), 1, alignment=Qt.AlignmentFlag.AlignLeft)
         else:
             logging.error(f"Page '{page_name}' does not exist.")
 

@@ -11,8 +11,9 @@ import os, sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class HomePage(QWidget):
-    def __init__(self):
+    def __init__(self, event_manager=None):
         super().__init__()
+        self.event_manager = event_manager
 
         self.setWindowTitle("NCAI - Home")
         
@@ -51,7 +52,8 @@ class HomePage(QWidget):
 
 
     def handleSubmit(self):
-        pass
+        # Submit is now handled on a different page (newSubmission.py) so send the message to main file to swap to this page
+        self.event_manager.newSubmission.emit()
 
 
     def handlePreviousSubmissions(self):
