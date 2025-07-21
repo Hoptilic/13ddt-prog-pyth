@@ -34,9 +34,9 @@ class FeedbackModule():
         """
 
         # convert <span title='...'> to styled spans
-        html = re.sub(r'<span\s+title="([^"]+)"\s*>(.*?)</span>', r"<span style='background-color: yellow' title='\1'>\2</span>", html, flags=re.DOTALL)
+        html = re.sub(r'<span\s+title="([^\"]+)"\s*>(.*?)</span>', r"<span style='background-color: yellow' title='\1'>\2</span>", html, flags=re.DOTALL)
         # conversion with different use of brackets
-        html = re.sub(r"<span\s+title='([^\"]+)'\s*>(.*?)</span>", r"<span style='background-color: yellow' title='\1'>\2</span>", html, flags=re.DOTALL)
+        html = re.sub(r"<span\s+title='([^\']+)'\s*>(.*?)</span>", r"<span style='background-color: yellow' title='\1'>\2</span>", html, flags=re.DOTALL)
         # convert <mark> to styled spans
         html = html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
         # add highlight style to spans with title but no existing highlight stuf
@@ -123,7 +123,7 @@ class FeedbackModule():
         "- Do NOT escape single quotes."
         "- Do NOT summarize or shorten the student's text. Output the full original version with highlights embedded."
         "- Do not include 'json' at the top of the output."
-        "- Do not use newlines outside of JSON string values."
+        "- Do not use newlines outside of JSON string values. For example, do not go {\\n \"Output\"}"
         "- Inside the span tags, use escape apostrophes (&quot) for any single quotes in the text."
     )
 
