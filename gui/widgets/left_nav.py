@@ -8,6 +8,8 @@ from PyQt6.QtCore import Qt
 from .recent_submissions import RecentSubmissions
 from .account import AccountWidget
 
+import os, sys
+
 class leftNav(QWidget):
     """
     Left navigation widget for the application.
@@ -50,5 +52,23 @@ class leftNav(QWidget):
 
         self.update_widget()
 
+        current_dir = os.path.dirname(__file__)
+        assets = os.path.join(current_dir, '..', 'styles', 'sheets')
+
+        page_ss = self.load_qss(os.path.join(assets, "leftnav.qss"), "leftnav.qss")
+
+        self.setStyleSheet(page_ss)
+
     def update_widget(self):
         self.account_widget.update_account_info()
+
+    def load_qss(self, path, name):
+        """
+        Load a QSS file and return its content.
+        """
+        try:
+            with open(path, 'r') as file:
+                return file.read()
+        except Exception as e:
+            print(f"Error loading QSS file {name}: {str(e)}")
+            return ""

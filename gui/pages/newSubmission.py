@@ -158,7 +158,7 @@ class NewSubmissionPage(QWidget):
         
         parent_size = self.size()
         max_width = parent_size.width() - 100
-        max_height = parent_size.height() - 200 
+        max_height = parent_size.height() - 300 
         
         desired_width = min(int(doc_size.width()) + 40, max_width)
         desired_height = min(int(doc_size.height()) + 40, max_height)

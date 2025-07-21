@@ -84,11 +84,19 @@ QLabel{
 }
 
 QMainWindow{
-    background:#140956;
+    background:#0B0437;
     color:#ffffff;
 }
 
-QStackedWidget{
-    background:#140956;
-    color:#ffffff;
+QStackedWidget {
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 0,
+        stop: 0 #0B0437,
+        stop: 0.72 #2B2072,
+        stop: 1 #4332B1
+    );
+}
+
+#mainFrame {
+    background: #0B0437
 }

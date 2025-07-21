@@ -55,7 +55,10 @@ class MainWindow(QMainWindow):
         # At some point make another widget so that the left_nav is loaded once at the start of the program instead of in each page
         self.main_frame = QWidget()
         self.main_layout = QHBoxLayout(self.main_frame)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)  # Remove margins for a cleaner look
+        self.main_layout.setSpacing(0)
         self.main_frame.setLayout(self.main_layout)
+        self.main_frame.setObjectName("mainFrame")
 
         self.stacked_widget = QStackedWidget()
         self.main_layout.insertWidget(1, self.stacked_widget, 3)
