@@ -81,6 +81,7 @@ QMessageBox{
 
 QLabel{
     color:#ffffff;
+    background: transparent;
 }
 
 QMainWindow{

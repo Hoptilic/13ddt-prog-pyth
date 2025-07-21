@@ -35,12 +35,15 @@ class leftNav(QWidget):
 
         self.homeButton = QPushButton("Dashboard")
         self.navLayout.addWidget(self.homeButton)
+        self.homeButton.setObjectName("homeButton")
 
         self.submissionsButton = QPushButton("My Submissions")
         self.navLayout.addWidget(self.submissionsButton)
+        self.submissionsButton.setObjectName("submissionsButton")
 
         self.aboutButton = QPushButton("About")
         self.navLayout.addWidget(self.aboutButton)
+        self.aboutButton.setObjectName("aboutButton")
 
         # Add the recent submissions widget at the bottom
         self.navLayout.addWidget(RecentSubmissions(), alignment=Qt.AlignmentFlag.AlignCenter)

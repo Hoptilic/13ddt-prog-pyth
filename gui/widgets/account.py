@@ -75,6 +75,13 @@ class AccountWidget(QWidget):
 
         self.setLayout(self.mainLayout)
 
+        current_dir = os.path.dirname(__file__)
+        assets = os.path.join(current_dir, '..', 'styles', 'sheets')
+
+        page_ss = self.load_qss(os.path.join(assets, "accountWidget.qss"), "accountWidget.qss")
+
+        self.setStyleSheet(page_ss)
+
     def update_account_info(self):
         """
         Update the account information displayed in the widget.
@@ -85,3 +92,14 @@ class AccountWidget(QWidget):
             self.usernameLabel.setText(f'{user}')
         else:
             self.usernameLabel.setText("Not logged in")
+
+    def load_qss(self, path, name):
+        """
+        Load a QSS file and return its content.
+        """
+        try:
+            with open(path, 'r') as file:
+                return file.read()
+        except Exception as e:
+            print(f"Error loading QSS file {name}: {str(e)}")
+            return ""

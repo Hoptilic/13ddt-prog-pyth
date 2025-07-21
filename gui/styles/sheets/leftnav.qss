@@ -5,3 +5,17 @@ QWidget{
     color:#ffffff;
 }
 
+#homeButton:hover, #submissionsButton:hover, #aboutButton:hover{
+    background: rgba(20, 9, 86, 89);
+}
+
+#homeButton:clicked, #submissionsButton:clicked, #aboutButton:clicked{
+    background: rgba(20, 9, 86, 89)
+}
+
+#homeButton, #submissionsButton, #aboutButton{
+    color:#ffffff;
+    font-family:Roboto, Helvetica, Arial, sans-serif;
+    font-weight:30;
+    font-size:30px;
+}
