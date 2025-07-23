@@ -42,6 +42,7 @@ class AccountWidget(QWidget):
         self.downArrow.setText("⬇️")
         self.usericonLayout.addWidget(self.downArrow, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        self.usericonLayout.setSpacing(0)
         self.usericonFrame.setLayout(self.usericonLayout)
         #\ 
 
