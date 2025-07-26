@@ -11,6 +11,88 @@
     padding:20px;
 }
 
+/* ---------- BUTTONS ---------- */
+/* Delete Button */
+#deleteButton {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+#deleteButton:hover {
+    background-color: #c82333;
+}
+
+#deleteButton:pressed {
+    background-color: #bd2130;
+}
+
+/* New Submission Button */
+#newSubmissionButton {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+#newSubmissionButton:hover {
+    background-color: #218838;
+}
+
+#newSubmissionButton:pressed {
+    background-color: #1e7e34;
+}
+
+/* ---------- RECENT SUBMISSIONS WIDGET ---------- */
+/* Recent Frame */
+#recentFrame {
+    border: 2px solid black;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+/* Individual Submission Frame */
+#mainFrame {
+    border: 2px solid black;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: white;
+}
+
+#mainFrame:hover {
+    background-color: #f8f9fa;
+    border-color: #007acc;
+}
+
+/* Submission Labels */
+#standardLabel {
+    font-weight: bold;
+}
+
+#gradeLabel {
+    color: #007acc;
+}
+
+#submissionLabel {
+    color: #666;
+}
+
+#timestampLabel {
+    font-size: 10px;
+    color: #999;
+}
+
+#clickHintLabel {
+    font-size: 10px;
+    color: #007acc;
+    font-style: italic;
+}
+
 /* ---------- TITLE ---------- */
 QLabel[text="Create a new submission"]{
     font-size:24px;

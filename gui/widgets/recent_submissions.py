@@ -28,7 +28,7 @@ class RecentSubmissions(QWidget):
         self.recentFrame.setObjectName("recentFrame")
         self.recentLayout = QVBoxLayout()
 
-        self.recentFrame.setStyleSheet("#recentFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
+        self.recentFrame.setObjectName("recentFrame")
 
         self.title = QLabel("Recent Submissions")
         self.recentLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
@@ -97,27 +97,16 @@ class RecentSubmissionIndividual(QWidget):
         self.indLayout = QVBoxLayout()
         self.mainFrame = QWidget()
         self.mainFrame.setObjectName("mainFrame")
-        self.mainFrame.setStyleSheet("""
-            #mainFrame {
-                border: 2px solid black; 
-                padding: 10px; 
-                border-radius: 10px;
-                background-color: white;
-            }
-            #mainFrame:hover {
-                background-color: #f8f9fa;
-                border-color: #007acc;
-            }
-        """)
+        self.mainFrame.setObjectName("mainFrame")
 
         if submission_data:
             # Display actual submission data
             self.standardLabel = QLabel(f"Standard: {submission_data.get('standard', 'N/A')} ({submission_data.get('year', 'N/A')})")
-            self.standardLabel.setStyleSheet("font-weight: bold;")
+            self.standardLabel.setObjectName("standardLabel")
             self.indLayout.addWidget(self.standardLabel, alignment=Qt.AlignmentFlag.AlignLeft)
 
             self.gradeLabel = QLabel(f"Grade: {submission_data.get('grade', 'Not graded')}")
-            self.gradeLabel.setStyleSheet("color: #007acc;")
+            self.gradeLabel.setObjectName("gradeLabel")
             self.indLayout.addWidget(self.gradeLabel, alignment=Qt.AlignmentFlag.AlignLeft)
 
             # Show truncated submission text
@@ -127,19 +116,19 @@ class RecentSubmissionIndividual(QWidget):
             
             self.submissionLabel = QLabel(f"Submission: {submission_text}")
             self.submissionLabel.setWordWrap(True)
-            self.submissionLabel.setStyleSheet("color: #666;")
+            self.submissionLabel.setObjectName("submissionLabel")
             self.indLayout.addWidget(self.submissionLabel, alignment=Qt.AlignmentFlag.AlignLeft)
 
             # Show timestamp
             timestamp = submission_data.get('timestamp', '')
             if timestamp:
                 self.timestampLabel = QLabel(f"Submitted: {timestamp}")
-                self.timestampLabel.setStyleSheet("font-size: 10px; color: #999;")
+                self.timestampLabel.setObjectName("timestampLabel")
                 self.indLayout.addWidget(self.timestampLabel, alignment=Qt.AlignmentFlag.AlignRight)
             
             # Add click hint
             click_hint = QLabel("Click to view details")
-            click_hint.setStyleSheet("font-size: 10px; color: #007acc; font-style: italic;")
+            click_hint.setObjectName("clickHintLabel")
             click_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.indLayout.addWidget(click_hint)
             

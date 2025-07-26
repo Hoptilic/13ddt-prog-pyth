@@ -56,53 +56,23 @@ class NewSubmissionPage(QWidget):
         self.ghostText.document().documentLayout().documentSizeChanged.connect(self.update_ghostTextSize)
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        # Button layout for submit and delete buttons
+        # Button layout for sbmut and delete buttons
         self.buttonLayout = QHBoxLayout()
         
         self.submitButton = QPushButton("Submit")
         self.submitButton.clicked.connect(self.handleSubit)
         self.buttonLayout.addWidget(self.submitButton)
         
-        self.deleteButton = QPushButton("🗑️ Delete Submission")
-        self.deleteButton.setStyleSheet("""
-            QPushButton {
-                background-color: #dc3545;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #c82333;
-            }
-            QPushButton:pressed {
-                background-color: #bd2130;
-            }
-        """)
+        self.deleteButton = QPushButton("Delete Submission")
+        self.deleteButton.setObjectName("deleteButton")
         self.deleteButton.clicked.connect(self.handleDelete)
-        self.deleteButton.hide()  # Hidden by default
+        self.deleteButton.hide()  # jhhidfe by default
         self.buttonLayout.addWidget(self.deleteButton)
         
         self.newSubmissionButton = QPushButton("New Submission")
-        self.newSubmissionButton.setStyleSheet("""
-            QPushButton {
-                background-color: #28a745;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #218838;
-            }
-            QPushButton:pressed {
-                background-color: #1e7e34;
-            }
-        """)
+        self.newSubmissionButton.setObjectName("newSubmissionButton")
         self.newSubmissionButton.clicked.connect(self.resetToNewSubmission)
-        self.newSubmissionButton.hide()  # Hidden by default
+        self.newSubmissionButton.hide()  # hide default
         self.buttonLayout.addWidget(self.newSubmissionButton)
         
         self.submissionsHandlerLayout.addLayout(self.buttonLayout)
@@ -205,6 +175,7 @@ class NewSubmissionPage(QWidget):
             
             # Save submission to database
             try:
+                # i really hope this works
                 db_manager = LLMDatabaseManager()
                 submission_id = db_manager.saveSubmission(
                     username=self.session_manager.currentUser,
