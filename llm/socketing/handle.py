@@ -63,6 +63,13 @@ class FeedbackModule():
             return html
         else:
             return("Error: No HighlightedHTML field found in output.")
+
+    def returnGrade(self, output_json):
+        """
+        Extract Grade from the JSON output - checks for multiple possible keys because the LLM has variation
+        """
+        grade = output_json.get('Grade') or output_json.get('grade') or (output_json.get('Output', {}).get('Grade')) or (output_json.get('Output', {}).get('grade'))
+        return grade or "Not graded"
         
         
     def handleFullSubmission(self, standard=None, year=None, userInput=None):

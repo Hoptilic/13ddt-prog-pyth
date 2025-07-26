@@ -32,6 +32,7 @@ class LLMDatabaseManager:
         self.dbPath = "./database/LLM_testdatabase.db"
         self.connection = sqlite3.connect(self.dbPath)
         self.cursor = self.connection.cursor()
+        self.createSubmissionsTable()
 
     def readDatabase(self, standard):
         """
@@ -86,7 +87,7 @@ class LLMDatabaseManager:
         """
         Returns a list of all available standards in the database.
         """
-        query = 'SELECT name FROM sqlite_master WHERE type = "table" AND name NOT LIKE "sqlite_%";'
+        query = 'SELECT name FROM sqlite_master WHERE type = "table" AND name NOT LIKE "sqlite_%" AND name != "submissions";'
         self.cursor.execute(query)
         rows = self.cursor.fetchall()
         print(rows)
@@ -107,6 +108,97 @@ class LLMDatabaseManager:
         Exits the database conection.
         """
         self.connection.close()
+
+    def createSubmissionsTable(self):
+        """
+        Creates the submissions table if it doesn't exist.
+        """
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS submissions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                standard TEXT NOT NULL,
+                year INTEGER NOT NULL,
+                submission_text TEXT NOT NULL,
+                feedback JSON,
+                highlighted_html TEXT,
+                grade TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        self.connection.commit()
+
+    def saveSubmission(self, username, standard, year, submissionText, feedback, highlightedHtml, grade):
+        """
+        Saves a submission to the database.
+        """
+        self.cursor.execute('''
+            INSERT INTO submissions 
+            (username, standard, year, submission_text, feedback, highlighted_html, grade)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (username, standard, year, submissionText, json.dumps(feedback), highlightedHtml, grade))
+        self.connection.commit()
+        return self.cursor.lastrowid
+
+    def getUserSubmissions(self, username, limit=10):
+        """
+        Retrieves recent submissions for a specific user.
+        """
+        self.cursor.execute('''
+            SELECT id, standard, year, submission_text, feedback, highlighted_html, grade, timestamp
+            FROM submissions 
+            WHERE username = ? 
+            ORDER BY timestamp DESC 
+            LIMIT ?
+        ''', (username, limit))
+        
+        rows = self.cursor.fetchall()
+        submissions = []
+        
+        for row in rows:
+            submission = {
+                "id": row[0],
+                "standard": row[1],
+                "year": row[2],
+                "submissionText": row[3],
+                "feedback": json.loads(row[4]) if row[4] else {},
+                "highlightedHtml": row[5],
+                "grade": row[6],
+                "timestamp": row[7]
+            }
+            submissions.append(submission)
+        
+        return submissions
+
+    def getAllSubmissions(self, limit=50):
+        """
+        Retrieves all recent submissions (for admin purposes).
+        """
+        self.cursor.execute('''
+            SELECT id, username, standard, year, submission_text, feedback, highlighted_html, grade, timestamp
+            FROM submissions 
+            ORDER BY timestamp DESC 
+            LIMIT ?
+        ''', (limit,))
+        
+        rows = self.cursor.fetchall()
+        submissions = []
+        
+        for row in rows:
+            submission = {
+                "id": row[0],
+                "username": row[1],
+                "standard": row[2],
+                "year": row[3],
+                "submissionText": row[4],
+                "feedback": json.loads(row[5]) if row[5] else {},
+                "highlightedHtml": row[6],
+                "grade": row[7],
+                "timestamp": row[8]
+            }
+            submissions.append(submission)
+        
+        return submissions
 
 class ExemplarInterpet():
     """

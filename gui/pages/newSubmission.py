@@ -9,6 +9,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from llm.socketing.handle import FeedbackModule
 from database.LLM_database_manage import LLMDatabaseManager
+from socketing.session import SessionFileManager
 import gui.styles.sheets as sheets
 
 import json
@@ -17,6 +18,7 @@ class NewSubmissionPage(QWidget):
     def __init__(self):
         super().__init__()
         self.feedback_module = FeedbackModule()
+        self.session_manager = SessionFileManager()
 
         self.setWindowTitle("NCAI - New Submission")
         
@@ -93,6 +95,11 @@ class NewSubmissionPage(QWidget):
         print("Available years loaded:", aval_years)
 
     def handleSubit(self):
+        # Check if user is logged in
+        if not self.session_manager.currentUser:
+            QMessageBox.warning(self, "Authentication Error", "Please log in to submit work.")
+            return
+            
         standard = self.standardText.currentText().strip()
         yearText = self.yearText.currentText().strip()
         userInput = self.ghostText.toPlainText().strip()
@@ -124,19 +131,40 @@ class NewSubmissionPage(QWidget):
                 QMessageBox.critical(self, result[0], result[1])
                 return
                 
-            # Display raw feedback
-            # self.resultDisplay.setPlainText(json.dumps(result, indent=2))
+            # Extract grade and highlighted HTML
+            highlighted_html = ""
+            grade = ""
             
-            # Extract and display highlighted HTML
             try:
                 highlighted_html = self.feedback_module.returnHighlightedHTML(result)
-                print(highlighted_html)
+                grade = self.feedback_module.returnGrade(result)  # Assuming this method exists
+                
                 if highlighted_html and not highlighted_html.startswith("Error:"):
                     self.ghostText.setHtml(highlighted_html)
                 else:
                     self.ghostText.setPlainText(highlighted_html or "No highlighted HTML available.")
+                    
             except Exception as e:
                 self.ghostText.setPlainText(f"Error extracting highlighted HTML: {str(e)}")
+            
+            # Save submission to database
+            try:
+                db_manager = LLMDatabaseManager()
+                submission_id = db_manager.saveSubmission(
+                    username=self.session_manager.currentUser,
+                    standard=standard,
+                    year=year,
+                    submissionText=userInput,
+                    feedback=result if isinstance(result, dict) else {},
+                    highlightedHtml=highlighted_html,
+                    grade=grade
+                )
+                db_manager.exit()
+                
+                QMessageBox.information(self, "Success", f"Submission saved successfully! (ID: {submission_id})")
+                
+            except Exception as e:
+                QMessageBox.warning(self, "Database Error", f"Failed to save submission: {str(e)}")
                 
         except Exception as ex:
             QMessageBox.critical(self, "Processing Error", str(ex))
