@@ -15,8 +15,9 @@ class leftNav(QWidget):
     Left navigation widget for the application.
     Contains buttons to navigate to different pages.
     """
-    def __init__(self):
+    def __init__(self, event_manager=None):
         super().__init__()
+        self.event_manager = event_manager
 
         self.setWindowTitle("NCAI - Navigation")
         
@@ -46,7 +47,11 @@ class leftNav(QWidget):
         self.aboutButton.setObjectName("aboutButton")
 
         # Add the recent submissions widget at the bottom
-        self.navLayout.addWidget(RecentSubmissions(), alignment=Qt.AlignmentFlag.AlignCenter)
+        self.recent_submissions_widget = RecentSubmissions()
+        if self.event_manager:
+            # Connect the submission click signal to the event manager
+            self.recent_submissions_widget.submission_clicked.connect(self.event_manager.view_submission.emit)
+        self.navLayout.addWidget(self.recent_submissions_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.navFrame.setLayout(self.navLayout)
         self.mainLayout.addWidget(self.navFrame, alignment=Qt.AlignmentFlag.AlignLeft)

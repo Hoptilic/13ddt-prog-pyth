@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QScrollArea
 )
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from database.LLM_database_manage import LLMDatabaseManager
 from socketing.session import SessionFileManager
 import sys, os
@@ -13,6 +13,8 @@ class RecentSubmissions(QWidget):
     """
     Widget to display recent submissions from the database.
     """
+    submission_clicked = pyqtSignal(dict)  # Emits submission data when clicked
+    
     def __init__(self):
         super().__init__()
 
@@ -70,6 +72,8 @@ class RecentSubmissions(QWidget):
             else:
                 for submission in submissions:
                     submission_widget = RecentSubmissionIndividual(submission)
+                    # Connect the submission click to our signal
+                    submission_widget.submission_clicked.connect(self.submission_clicked.emit)
                     self.scrollLayout.addWidget(submission_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
         except Exception as e:
@@ -80,6 +84,8 @@ class RecentSubmissionIndividual(QWidget):
     """
     Widget to display an individual recent submission.
     """
+    submission_clicked = pyqtSignal(dict)  # Emits submission data when clicked
+    
     def __init__(self, submission_data=None):
         super().__init__()
 
@@ -91,7 +97,18 @@ class RecentSubmissionIndividual(QWidget):
         self.indLayout = QVBoxLayout()
         self.mainFrame = QWidget()
         self.mainFrame.setObjectName("mainFrame")
-        self.mainFrame.setStyleSheet("#mainFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
+        self.mainFrame.setStyleSheet("""
+            #mainFrame {
+                border: 2px solid black; 
+                padding: 10px; 
+                border-radius: 10px;
+                background-color: white;
+            }
+            #mainFrame:hover {
+                background-color: #f8f9fa;
+                border-color: #007acc;
+            }
+        """)
 
         if submission_data:
             # Display actual submission data
@@ -119,6 +136,13 @@ class RecentSubmissionIndividual(QWidget):
                 self.timestampLabel = QLabel(f"Submitted: {timestamp}")
                 self.timestampLabel.setStyleSheet("font-size: 10px; color: #999;")
                 self.indLayout.addWidget(self.timestampLabel, alignment=Qt.AlignmentFlag.AlignRight)
+            
+            # Add click hint
+            click_hint = QLabel("Click to view details")
+            click_hint.setStyleSheet("font-size: 10px; color: #007acc; font-style: italic;")
+            click_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.indLayout.addWidget(click_hint)
+            
         else:
             # Placeholder for when no data is provided
             self.submissionLabel = QLabel("placeholder test")
@@ -127,4 +151,14 @@ class RecentSubmissionIndividual(QWidget):
 
         self.mainFrame.setLayout(self.indLayout)
         self.mainLayout.addWidget(self.mainFrame, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(self.mainLayout) 
+        self.setLayout(self.mainLayout)
+        
+        # Enable clicking if we have submission data
+        if submission_data:
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
+    
+    def mousePressEvent(self, event):
+        """Handle mouse click to emit submission data."""
+        if event.button() == Qt.MouseButton.LeftButton and self.submission_data:
+            self.submission_clicked.emit(self.submission_data)
+        super().mousePressEvent(event) 

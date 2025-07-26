@@ -31,6 +31,7 @@ class EventManager(QObject):
     register_success = pyqtSignal(str)  # emits username
     switch_page = pyqtSignal(str)  # emits page name
     newSubmission = pyqtSignal()  # emits nothing, used to switch to new submission page
+    view_submission = pyqtSignal(dict)  # emits submission data to view existing submission
 
     def __init__(self):
         super().__init__()
@@ -80,6 +81,7 @@ class MainWindow(QMainWindow):
         # Connect event manager signals to slots
         self.event_manager.login_success.connect(lambda username: self.switch_page("home"))
         self.event_manager.newSubmission.connect(lambda: self.switch_page("newSubmission"))
+        self.event_manager.view_submission.connect(self.view_submission)
         self.event_manager.switch_page.connect(self.switch_page)
 
         # This behaviour will change as the login page will be skipped if the user is already signed in
@@ -100,9 +102,17 @@ class MainWindow(QMainWindow):
                 self.stacked_widget.setCurrentWidget(self.pages[page_name])
                 # Only insert the left navigation if it is not already there based on the name of the leftnav
                 if not isinstance(self.main_layout.itemAt(0).widget(), type(left_nav.leftNav())):
-                    self.main_layout.insertWidget(0, left_nav.leftNav(), 1, alignment=Qt.AlignmentFlag.AlignLeft)
+                    self.main_layout.insertWidget(0, left_nav.leftNav(event_manager=self.event_manager), 1, alignment=Qt.AlignmentFlag.AlignLeft)
         else:
             logging.error(f"Page '{page_name}' does not exist.")
+
+    def view_submission(self, submission_data):
+        """
+        Switch to newSubmission page and load the submission data for viewing.
+        """
+        self.switch_page("newSubmission")
+        # Load the submission data into the newSubmission page
+        self.pages["newSubmission"].loadExistingSubmission(submission_data)
 
     def load_qss(self, path, name):
         """

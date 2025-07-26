@@ -97,11 +97,19 @@ class LLMDatabaseManager:
         """
         Returns a list of all available years for a specific standard in the database.
         """
-        query = f'SELECT DISTINCT year FROM "{standard}"'
-        self.cursor.execute(query)
-        rows = self.cursor.fetchall()
-        print(rows)
-        return [row[0] for row in rows]
+        if not standard or not standard.strip():
+            print("Error: Empty or invalid standard provided")
+            return []
+            
+        try:
+            query = f'SELECT DISTINCT year FROM "{standard.strip()}"'
+            self.cursor.execute(query)
+            rows = self.cursor.fetchall()
+            print(rows)
+            return [row[0] for row in rows]
+        except Exception as e:
+            print(f"Error retrieving years for standard '{standard}': {str(e)}")
+            return []
 
     def exit(self):  # method retained but uses camelCase for consistency
         """

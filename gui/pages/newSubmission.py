@@ -19,6 +19,8 @@ class NewSubmissionPage(QWidget):
         super().__init__()
         self.feedback_module = FeedbackModule()
         self.session_manager = SessionFileManager()
+        self.current_submission_data = None  # Store current submission if viewing existing one
+        self.is_viewing_mode = False  # Flag to track if we're viewing an existing submission
 
         self.setWindowTitle("NCAI - New Submission")
         
@@ -54,9 +56,56 @@ class NewSubmissionPage(QWidget):
         self.ghostText.document().documentLayout().documentSizeChanged.connect(self.update_ghostTextSize)
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
 
+        # Button layout for submit and delete buttons
+        self.buttonLayout = QHBoxLayout()
+        
         self.submitButton = QPushButton("Submit")
-        self.submissionsHandlerLayout.addWidget(self.submitButton, alignment=Qt.AlignmentFlag.AlignCenter)
         self.submitButton.clicked.connect(self.handleSubit)
+        self.buttonLayout.addWidget(self.submitButton)
+        
+        self.deleteButton = QPushButton("🗑️ Delete Submission")
+        self.deleteButton.setStyleSheet("""
+            QPushButton {
+                background-color: #dc3545;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #c82333;
+            }
+            QPushButton:pressed {
+                background-color: #bd2130;
+            }
+        """)
+        self.deleteButton.clicked.connect(self.handleDelete)
+        self.deleteButton.hide()  # Hidden by default
+        self.buttonLayout.addWidget(self.deleteButton)
+        
+        self.newSubmissionButton = QPushButton("New Submission")
+        self.newSubmissionButton.setStyleSheet("""
+            QPushButton {
+                background-color: #28a745;
+                color: white;
+                border: none;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #218838;
+            }
+            QPushButton:pressed {
+                background-color: #1e7e34;
+            }
+        """)
+        self.newSubmissionButton.clicked.connect(self.resetToNewSubmission)
+        self.newSubmissionButton.hide()  # Hidden by default
+        self.buttonLayout.addWidget(self.newSubmissionButton)
+        
+        self.submissionsHandlerLayout.addLayout(self.buttonLayout)
 
         self.submissionsHandlerFrame.setLayout(self.submissionsHandlerLayout)
         #\
@@ -137,7 +186,14 @@ class NewSubmissionPage(QWidget):
             
             try:
                 highlighted_html = self.feedback_module.returnHighlightedHTML(result)
-                grade = self.feedback_module.returnGrade(result)  # Assuming this method exists
+                
+                # Extract grade from result - check various possible keys
+                if isinstance(result, dict):
+                    grade = (result.get('Grade') or 
+                            result.get('grade') or
+                            result.get('Output', {}).get('Grade') if isinstance(result.get('Output'), dict) else None or
+                            result.get('Output', {}).get('grade') if isinstance(result.get('Output'), dict) else None or
+                            'Unknown')
                 
                 if highlighted_html and not highlighted_html.startswith("Error:"):
                     self.ghostText.setHtml(highlighted_html)
@@ -173,7 +229,12 @@ class NewSubmissionPage(QWidget):
         selected_standard = self.standardText.currentText()
         print(f"Selected standard: {selected_standard}")
 
-        self.loadAvailableYears(selected_standard)
+        # Only load years if we have a valid standard selected
+        if selected_standard and selected_standard.strip():
+            self.loadAvailableYears(selected_standard)
+        else:
+            # Clear the year dropdown if no valid standard is selected
+            self.yearText.clear()
 
     def handleYearComboboxChange(self):
         selected_year = self.yearText.currentText()
@@ -210,3 +271,123 @@ class NewSubmissionPage(QWidget):
         except Exception as e:
             print(f"Error loading QSS file {name}: {str(e)}")
             return ""
+    
+    def loadExistingSubmission(self, submission_data):
+        """
+        Load an existing submission for viewing/editing.
+        """
+        self.current_submission_data = submission_data
+        self.is_viewing_mode = True
+        
+        # Update UI title
+        self.title.setText(f"Viewing Submission - {submission_data.get('standard', 'N/A')} ({submission_data.get('year', 'N/A')})")
+        
+        # Set form fields
+        standard = submission_data.get('standard', '')
+        year = str(submission_data.get('year', ''))
+        
+        # Find and set standard
+        standard_index = self.standardText.findText(standard)
+        if standard_index >= 0:
+            self.standardText.setCurrentIndex(standard_index)
+            self.loadAvailableYears(standard)
+            
+            # Set year
+            year_index = self.yearText.findText(year)
+            if year_index >= 0:
+                self.yearText.setCurrentIndex(year_index)
+        
+        # Load submission text and feedback
+        highlighted_html = submission_data.get('highlightedHtml', '')
+        if highlighted_html:
+            self.ghostText.setHtml(highlighted_html)
+        else:
+            self.ghostText.setPlainText(submission_data.get('submissionText', ''))
+        
+        self.ghostText.setEnabled(False)  # Make read-only in viewing mode
+        
+        # Update button visibility
+        self.submitButton.hide()
+        self.deleteButton.show()
+        self.newSubmissionButton.show()
+        
+        # Disable form controls in viewing mode
+        self.standardText.setEnabled(False)
+        self.yearText.setEnabled(False)
+    
+    def resetToNewSubmission(self):
+        """
+        Reset the form to create a new submission.
+        """
+        self.current_submission_data = None
+        self.is_viewing_mode = False
+        
+        # Update UI title
+        self.title.setText("Create a new submission")
+        
+        # Temporarily disconnect signals to prevent errors during reset
+        self.standardText.currentIndexChanged.disconnect()
+        self.yearText.currentIndexChanged.disconnect()
+        
+        # Clear form
+        self.standardText.setCurrentIndex(-1)
+        self.yearText.clear()
+        self.ghostText.clear()
+        self.ghostText.setPlaceholderText("This movie, Mad Max, isd irected by...")
+        self.ghostText.setDisabled(True)
+        
+        # Reconnect signals
+        self.standardText.currentIndexChanged.connect(self.handleStandardComboboxChange)
+        self.yearText.currentIndexChanged.connect(self.handleYearComboboxChange)
+        
+        # Update button visibility
+        self.submitButton.show()
+        self.deleteButton.hide()
+        self.newSubmissionButton.hide()
+        
+        # Re-enable form controls
+        self.standardText.setEnabled(True)
+        self.yearText.setEnabled(True)
+        
+        # Reload available standards
+        self.loadAvailableStandards()
+    
+    def handleDelete(self):
+        """
+        Delete the current submission after confirmation.
+        """
+        if not self.current_submission_data:
+            return
+            
+        submission_id = self.current_submission_data.get('id')
+        standard = self.current_submission_data.get('standard', 'N/A')
+        year = self.current_submission_data.get('year', 'N/A')
+        timestamp = self.current_submission_data.get('timestamp', 'Unknown')
+        
+        reply = QMessageBox.question(
+            self, 
+            "Confirm Deletion",
+            f"Are you sure you want to delete this submission?\n\n"
+            f"Standard: {standard}\n"
+            f"Year: {year}\n"
+            f"Submitted: {timestamp}\n\n"
+            f"This action cannot be undone.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            try:
+                db_manager = LLMDatabaseManager()
+                # Delete from database
+                db_manager.cursor.execute("DELETE FROM submissions WHERE id = ?", (submission_id,))
+                db_manager.connection.commit()
+                db_manager.exit()
+                
+                QMessageBox.information(self, "Success", "Submission deleted successfully!")
+                
+                # Reset to new submission mode
+                self.resetToNewSubmission()
+                
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to delete submission: {str(e)}")
