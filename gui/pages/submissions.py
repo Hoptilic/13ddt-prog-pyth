@@ -7,7 +7,7 @@ from PyQt6.QtCore import Qt
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from widgets.submission_individual import submissionIndividual
+from widgets.submission_individual import RecentSubmissionIndividual
 
 class SubmissionsPage(QWidget):
     def __init__(self):
@@ -35,7 +35,7 @@ class SubmissionsPage(QWidget):
         self.submissionsHandlerFrame.setStyleSheet("#submissionsHandlerFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
 
         for i in range(3):
-            self.submissionsHandlerLayout.addWidget(submissionIndividual(), alignment=Qt.AlignmentFlag.AlignCenter)
+            self.submissionsHandlerLayout.addWidget(RecentSubmissionIndividual(), alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.submissionsHandlerFrame.setLayout(self.submissionsHandlerLayout)
         #\

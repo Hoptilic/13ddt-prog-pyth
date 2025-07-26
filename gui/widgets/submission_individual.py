@@ -3,24 +3,95 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QTextEdit
 )
 
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
+import os, sys
 
-class submissionIndividual(QWidget):
-    def __init__(self):
+class RecentSubmissionIndividual(QWidget):
+    """
+    Widget to display an individual recent submission.
+    """
+    submission_clicked = pyqtSignal(dict)  # Emits submission data when clicked
+    
+    def __init__(self, submission_data=None):
         super().__init__()
+
+        self.setWindowTitle("Recent Submission")
+        self.submission_data = submission_data or {}
+
         self.mainLayout = QVBoxLayout()
 
-        self.title = QLabel("Placeholder Title")
-        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.mainLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.indLayout = QVBoxLayout()
+        self.mainFrame = QWidget()
+        self.mainFrame.setObjectName("mainFrame")
 
-        self.shortDesc = QTextEdit()
-        self.shortDesc.setPlaceholderText("Short description of the submission entry...")
-        self.shortDesc.setReadOnly(True)
-        self.mainLayout.addWidget(self.shortDesc, alignment=Qt.AlignmentFlag.AlignCenter)
+        if submission_data:
+            # Display actual submission data
+            self.standardLabel = QLabel(f"Standard: {submission_data.get('standard', 'N/A')} ({submission_data.get('year', 'N/A')})")
+            self.standardLabel.setObjectName("standardLabel")
+            self.indLayout.addWidget(self.standardLabel, alignment=Qt.AlignmentFlag.AlignLeft)
 
-        self.learnMoreButton = QPushButton("View Submission")
-        self.learnMoreButton.setCursor(Qt.CursorShape.PointingHandCursor)
-        self.mainLayout.addWidget(self.learnMoreButton, alignment=Qt.AlignmentFlag.AlignCenter)
+            self.gradeLabel = QLabel(f"Grade: {submission_data.get('grade', 'Not graded')}")
+            self.gradeLabel.setObjectName("gradeLabel")
+            self.indLayout.addWidget(self.gradeLabel, alignment=Qt.AlignmentFlag.AlignLeft)
 
+            # Show truncated submission text
+            submission_text = submission_data.get('submissionText', '')
+            if len(submission_text) > 100:
+                submission_text = submission_text[:100] + "..."
+            
+            self.submissionLabel = QLabel(f"Submission: {submission_text}")
+            self.submissionLabel.setWordWrap(True)
+            self.submissionLabel.setObjectName("submissionLabel")
+            self.indLayout.addWidget(self.submissionLabel, alignment=Qt.AlignmentFlag.AlignLeft)
+
+            # Show timestamp
+            timestamp = submission_data.get('timestamp', '')
+            if timestamp:
+                self.timestampLabel = QLabel(f"Submitted: {timestamp}")
+                self.timestampLabel.setObjectName("timestampLabel")
+                self.indLayout.addWidget(self.timestampLabel, alignment=Qt.AlignmentFlag.AlignRight)
+            
+            # Add click hint
+            click_hint = QLabel("Click to view details")
+            click_hint.setObjectName("clickHintLabel")
+            click_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.indLayout.addWidget(click_hint)
+            
+        else:
+            # Placeholder for when no data is provided
+            self.submissionLabel = QLabel("placeholder test")
+            self.submissionLabel.setWordWrap(True)
+            self.indLayout.addWidget(self.submissionLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+
+        self.mainFrame.setLayout(self.indLayout)
+        self.mainLayout.addWidget(self.mainFrame, alignment=Qt.AlignmentFlag.AlignCenter)
         self.setLayout(self.mainLayout)
+        
+        # Enable clicking if we have submission data
+        if submission_data:
+            self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+
+        current_dir = os.path.dirname(__file__)
+        assets = os.path.join(current_dir, '..', 'styles', 'sheets')
+
+        page_ss = self.load_qss(os.path.join(assets, "recentSubmissionWidget.qss"), "recentSubmissionWidget.qss")
+
+        self.setStyleSheet(page_ss)
+    
+    def mousePressEvent(self, event):
+        """Handle mouse click to emit submission data."""
+        if event.button() == Qt.MouseButton.LeftButton and self.submission_data:
+            self.submission_clicked.emit(self.submission_data)
+        super().mousePressEvent(event) 
+
+    def load_qss(self, path, name):
+        """
+        Load a QSS file and return its content.
+        """
+        try:
+            with open(path, 'r') as file:
+                return file.read()
+        except Exception as e:
+            print(f"Error loading QSS file {name}: {str(e)}")
+            return ""

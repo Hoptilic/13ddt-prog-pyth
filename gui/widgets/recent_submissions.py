@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from database.LLM_database_manage import LLMDatabaseManager
 from socketing.session import SessionFileManager
+from widgets.submission_individual import RecentSubmissionIndividual
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -79,75 +80,3 @@ class RecentSubmissions(QWidget):
         except Exception as e:
             error_label = QLabel(f"Error loading submissions: {str(e)}")
             self.scrollLayout.addWidget(error_label, alignment=Qt.AlignmentFlag.AlignCenter)
-
-class RecentSubmissionIndividual(QWidget):
-    """
-    Widget to display an individual recent submission.
-    """
-    submission_clicked = pyqtSignal(dict)  # Emits submission data when clicked
-    
-    def __init__(self, submission_data=None):
-        super().__init__()
-
-        self.setWindowTitle("Recent Submission")
-        self.submission_data = submission_data or {}
-
-        self.mainLayout = QVBoxLayout()
-
-        self.indLayout = QVBoxLayout()
-        self.mainFrame = QWidget()
-        self.mainFrame.setObjectName("mainFrame")
-        self.mainFrame.setObjectName("mainFrame")
-
-        if submission_data:
-            # Display actual submission data
-            self.standardLabel = QLabel(f"Standard: {submission_data.get('standard', 'N/A')} ({submission_data.get('year', 'N/A')})")
-            self.standardLabel.setObjectName("standardLabel")
-            self.indLayout.addWidget(self.standardLabel, alignment=Qt.AlignmentFlag.AlignLeft)
-
-            self.gradeLabel = QLabel(f"Grade: {submission_data.get('grade', 'Not graded')}")
-            self.gradeLabel.setObjectName("gradeLabel")
-            self.indLayout.addWidget(self.gradeLabel, alignment=Qt.AlignmentFlag.AlignLeft)
-
-            # Show truncated submission text
-            submission_text = submission_data.get('submissionText', '')
-            if len(submission_text) > 100:
-                submission_text = submission_text[:100] + "..."
-            
-            self.submissionLabel = QLabel(f"Submission: {submission_text}")
-            self.submissionLabel.setWordWrap(True)
-            self.submissionLabel.setObjectName("submissionLabel")
-            self.indLayout.addWidget(self.submissionLabel, alignment=Qt.AlignmentFlag.AlignLeft)
-
-            # Show timestamp
-            timestamp = submission_data.get('timestamp', '')
-            if timestamp:
-                self.timestampLabel = QLabel(f"Submitted: {timestamp}")
-                self.timestampLabel.setObjectName("timestampLabel")
-                self.indLayout.addWidget(self.timestampLabel, alignment=Qt.AlignmentFlag.AlignRight)
-            
-            # Add click hint
-            click_hint = QLabel("Click to view details")
-            click_hint.setObjectName("clickHintLabel")
-            click_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.indLayout.addWidget(click_hint)
-            
-        else:
-            # Placeholder for when no data is provided
-            self.submissionLabel = QLabel("placeholder test")
-            self.submissionLabel.setWordWrap(True)
-            self.indLayout.addWidget(self.submissionLabel, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.mainFrame.setLayout(self.indLayout)
-        self.mainLayout.addWidget(self.mainFrame, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(self.mainLayout)
-        
-        # Enable clicking if we have submission data
-        if submission_data:
-            self.setCursor(Qt.CursorShape.PointingHandCursor)
-    
-    def mousePressEvent(self, event):
-        """Handle mouse click to emit submission data."""
-        if event.button() == Qt.MouseButton.LeftButton and self.submission_data:
-            self.submission_clicked.emit(self.submission_data)
-        super().mousePressEvent(event) 
