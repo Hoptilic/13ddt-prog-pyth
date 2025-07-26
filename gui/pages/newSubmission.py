@@ -275,7 +275,7 @@ class NewSubmissionPage(QWidget):
         else:
             self.ghostText.setPlainText(submission_data.get('submissionText', ''))
         
-        self.ghostText.setEnabled(False)  # Make read-only in viewing mode
+        self.ghostText.setEnabled(False)  # Make read-only in vwieing mode
         
         # Update button visibility
         self.submitButton.hide()
@@ -306,6 +306,9 @@ class NewSubmissionPage(QWidget):
         self.ghostText.clear()
         self.ghostText.setPlaceholderText("This movie, Mad Max, isd irected by...")
         self.ghostText.setDisabled(True)
+        
+        # Reset the size of the text edit to default
+        self.update_ghostTextSize()
         
         # Reconnect signals
         self.standardText.currentIndexChanged.connect(self.handleStandardComboboxChange)
