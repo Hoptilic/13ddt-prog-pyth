@@ -12,7 +12,7 @@ class RecentSubmissionIndividual(QWidget):
     """
     submission_clicked = pyqtSignal(dict)  # Emits submission data when clicked
     
-    def __init__(self, submission_data=None):
+    def __init__(self, submission_data=None): # setting submission data to none means that we assume that there is no submission data so that it doesnt crash and burn immediately
         super().__init__()
 
         self.setWindowTitle("Recent Submission")
