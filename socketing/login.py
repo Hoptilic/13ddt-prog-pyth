@@ -54,22 +54,21 @@ class Login():
             100000
         )
         return new_key == key
-    
-    def grantCookie(self, cookie_id):
-        """
-        Grants a cookie to the user.
-        Checks if the user already has a cookie - if they do, the cookie is refreshed.
-        If there is no cookie, a new one is created.
-        """
-        # Check if the user already has a cookie
-        if self.checkCookie(cookie_id):
-            # Refresh the cookie
-            self.freshenCookie(cookie_id)
-        else:
-            # Create a new cookie
-            self.createCookie()
+    # def grantCookie(self, cookie_id):
+    #     """
+    #     Grants a cookie to the user.
+    #     Checks if the user already has a cookie - if they do, the cookie is refreshed.
+    #     If there is no cookie, a new one is created.
+    #     """
+    #     # Check if the user already has a cookie
+    #     if self.checkCookie(cookie_id):
+    #         # Refresh the cookie
+    #         self.freshenCookie(cookie_id)
+    #     else:
+    #         # Create a new cookie
+    #         self.createCookie()
         
-        return True
+    #     return True
 
     # Temporarily use text files until a database is implemented
 
