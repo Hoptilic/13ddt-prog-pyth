@@ -34,18 +34,18 @@ class FeedbackModule():
         """
 
         # convert <span title='...'> to styled spans
-        html = re.sub(r'<span\s+title="([^\"]+)"\s*>(.*?)</span>', r"<span style='background-color: yellow' title='\1'>\2</span>", html, flags=re.DOTALL)
+        html = re.sub(r'<span\s+title="([^\"]+)"\s*>(.*?)</span>', r"<span style='background-color: #66FFCC' title='\1'>\2</span>", html, flags=re.DOTALL)
         # conversion with different use of brackets
-        html = re.sub(r"<span\s+title='([^\']+)'\s*>(.*?)</span>", r"<span style='background-color: yellow' title='\1'>\2</span>", html, flags=re.DOTALL)
+        html = re.sub(r"<span\s+title='([^\']+)'\s*>(.*?)</span>", r"<span style='background-color: #66FFCC' title='\1'>\2</span>", html, flags=re.DOTALL)
         # convert <mark> to styled spans
-        html = html.replace('<mark>', "<span style='background-color: yellow'>").replace('</mark>', '</span>')
+        html = html.replace('<mark>', "<span style='background-color: #66FFCC'>").replace('</mark>', '</span>')
         # add highlight style to spans with title but no existing highlight stuf
         pattern = r'<span((?![^>]*style)[^>]*\btitle="[^"]+"[^>]*)>'
-        repl = r'<span\1 style="background-color: yellow">'
+        repl = r'<span\1 style="background-color: #66FFCC">'
         html = re.sub(pattern, repl, html)
         # same as above but with single quotes
         pattern_single = r"<span((?![^>]*style)[^>]*\btitle='[^']+'[^>]*)>"
-        repl_single = r"<span\1 style=\"background-color: yellow\">"
+        repl_single = r"<span\1 style=\"background-color: #66FFCC\">"
         html = re.sub(pattern_single, repl_single, html)
 
         # We use more than one regex so that we can catch it all because the LLM is not perfect - hopefully this covers all the possibilities
@@ -120,7 +120,7 @@ class FeedbackModule():
         "Your task is to return ONLY a valid JSON object in the following format:"
         "{\"Output\": {\"StudentText\": \"...\", \"Grade\": \"...\",\"Feedback\": {\"Strengths\": \"...\",\"Areas for Improvement\": \"...\"},\"HighlightedHTML\": \"...\"}}"
         "Inside the 'HighlightedHTML' field, return the student's full original text, converted to HTML. Highlight problematic or improvable text segments using:"
-        "- <span title='Your feedback here' style='background-color: yellow'>Text needing feedback</span>"
+        "- <span title='Your feedback here' style='background-color: #66FFCC'>Text needing feedback</span>"
         "Each highlighted section must include a tooltip via the 'title' attribute that clearly explains what is wrong or how it can improve."
         "If you highlight something, it MUST have a title with feedback. If you give feedback, it MUST be tied to a highlighted span."
         "**Important output rules:**"
