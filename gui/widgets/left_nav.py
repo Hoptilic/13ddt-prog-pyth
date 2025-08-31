@@ -37,10 +37,14 @@ class leftNav(QWidget):
         self.homeButton = QPushButton("Dashboard")
         self.navLayout.addWidget(self.homeButton)
         self.homeButton.setObjectName("homeButton")
+        if self.event_manager:
+            self.homeButton.clicked.connect(lambda: self.event_manager.switch_page.emit("home"))
 
         self.submissionsButton = QPushButton("My Submissions")
         self.navLayout.addWidget(self.submissionsButton)
         self.submissionsButton.setObjectName("submissionsButton")
+        if self.event_manager:
+            self.submissionsButton.clicked.connect(lambda: self.event_manager.switch_page.emit("submissions"))
 
         # Unused
         # self.aboutButton = QPushButton("About")

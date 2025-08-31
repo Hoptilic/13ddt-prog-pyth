@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout,
-    QLabel, QPushButton, QTextEdit
+    QLabel, QPushButton, QTextEdit, QGraphicsDropShadowEffect
 )
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -22,7 +22,7 @@ class RecentSubmissionIndividual(QWidget):
 
         self.indLayout = QVBoxLayout()
         self.mainFrame = QWidget()
-        self.mainFrame.setObjectName("mainFrame")
+        self.mainFrame.setObjectName("submissionCard")
 
         if submission_data:
             # Display actual submission data
@@ -64,13 +64,18 @@ class RecentSubmissionIndividual(QWidget):
             self.indLayout.addWidget(self.submissionLabel, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.mainFrame.setLayout(self.indLayout)
+        # Subtle shadow for card depth
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(16)
+        shadow.setOffset(0, 2)
+        shadow.setColor(Qt.GlobalColor.black)
+        self.mainFrame.setGraphicsEffect(shadow)
         self.mainLayout.addWidget(self.mainFrame, alignment=Qt.AlignmentFlag.AlignCenter)
         self.setLayout(self.mainLayout)
-        
+
         # Enable clicking if we have submission data
         if submission_data:
             self.setCursor(Qt.CursorShape.PointingHandCursor)
-
 
         current_dir = os.path.dirname(__file__)
         assets = os.path.join(current_dir, '..', 'styles', 'sheets')

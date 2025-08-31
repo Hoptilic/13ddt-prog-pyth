@@ -66,19 +66,19 @@ class MainWindow(QMainWindow):
         self.stacked_widget = QStackedWidget()
         self.main_layout.insertWidget(1, self.stacked_widget, 3)
         self.setCentralWidget(self.main_frame)
-        # Opacity effect for animated page transitions
-        self._stack_opacity = QGraphicsOpacityEffect(self.stacked_widget)
-        self._stack_opacity.setOpacity(1.0)
-        self.stacked_widget.setGraphicsEffect(self._stack_opacity)
+        # Animation state (effect created only during animations)
+        self._stack_opacity = None
         self._fade_out = None
         self._fade_in = None
+        # Toggle animations globally (disable if causing paint issues)
+        self.enable_animations = False
 
         self.pages = {
             "home": home.HomePage(event_manager=self.event_manager),
             "about": about.AboutPage(),
             "login": login.LoginPage(event_manager=self.event_manager),
             "newSubmission": newSubmission.NewSubmissionPage(),
-            #"submissions": submissions.SubmissionsPage(),
+            "submissions": submissions.SubmissionsPage(event_manager=self.event_manager),
             "user": user.UserPage(event_manager=self.event_manager)
         }
 
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
                     first_item = self.main_layout.itemAt(0)
                     if first_item is not None and getattr(first_item, 'widget', None):
                         w = first_item.widget()
-                        if isinstance(w, type(left_nav.leftNav())):
+                        if isinstance(w, left_nav.leftNav):
                             self.main_layout.removeWidget(w)
                             w.setParent(None)
                 else:
@@ -118,46 +118,75 @@ class MainWindow(QMainWindow):
                     # Only insert left nav if not present
                     first_item = self.main_layout.itemAt(0)
                     existing_widget = first_item.widget() if first_item and first_item.widget() else None
-                    if not isinstance(existing_widget, type(left_nav.leftNav())):
+                    if not isinstance(existing_widget, left_nav.leftNav):
                         self.main_layout.insertWidget(0, left_nav.leftNav(event_manager=self.event_manager), 1, alignment=Qt.AlignmentFlag.AlignLeft)
 
             # Setup animations
-            try:
-                # Fade out
-                self._fade_out = QPropertyAnimation(self._stack_opacity, b"opacity")
-                self._fade_out.setDuration(200)
-                self._fade_out.setStartValue(1.0)
-                self._fade_out.setEndValue(0.0)
-                self._fade_out.setEasingCurve(QEasingCurve.Type.InOutQuad)
+            if self.enable_animations:
+                try:
+                    # Create and attach opacity effect only for the duration of the animation
+                    if self._stack_opacity is None:
+                        self._stack_opacity = QGraphicsOpacityEffect(self.stacked_widget)
+                        self.stacked_widget.setGraphicsEffect(self._stack_opacity)
+                    self._stack_opacity.setOpacity(1.0)
+                    # Fade out
+                    self._fade_out = QPropertyAnimation(self._stack_opacity, b"opacity")
+                    self._fade_out.setDuration(200)
+                    self._fade_out.setStartValue(1.0)
+                    self._fade_out.setEndValue(0.0)
+                    self._fade_out.setEasingCurve(QEasingCurve.Type.InOutQuad)
 
-                # On fade-out finished, switch and fade-in
-                def on_fade_out_finished():
-                    perform_switch()
-                    self._fade_in = QPropertyAnimation(self._stack_opacity, b"opacity")
-                    self._fade_in.setDuration(200)
-                    self._fade_in.setStartValue(0.0)
-                    self._fade_in.setEndValue(1.0)
-                    self._fade_in.setEasingCurve(QEasingCurve.Type.InOutQuad)
-                    self._fade_in.start()
+                    # On fade-out finished, switch and fade-in
+                    def on_fade_out_finished():
+                        perform_switch()
+                        self._fade_in = QPropertyAnimation(self._stack_opacity, b"opacity")
+                        self._fade_in.setDuration(200)
+                        self._fade_in.setStartValue(0.0)
+                        self._fade_in.setEndValue(1.0)
+                        self._fade_in.setEasingCurve(QEasingCurve.Type.InOutQuad)
+                        # When fade-in completes, remove the effect to avoid painting issues during normal interaction
+                        def on_fade_in_finished():
+                            try:
+                                self.stacked_widget.setGraphicsEffect(None)
+                            except Exception:
+                                pass
+                            self._stack_opacity = None
+                            self._fade_in = None
+                            self._fade_out = None
+                        self._fade_in.finished.connect(on_fade_in_finished)
+                        self._fade_in.start()
 
-                self._fade_out.finished.connect(on_fade_out_finished)
-                self._fade_out.start()
-                return
-            except Exception:
-                # Fallback to immediate switch on animation issues
-                pass
+                    self._fade_out.finished.connect(on_fade_out_finished)
+                    self._fade_out.start()
+                    return
+                except Exception:
+                    # Fallback to immediate switch on animation issues
+                    try:
+                        self.stacked_widget.setGraphicsEffect(None)
+                    except Exception:
+                        pass
+                    self._stack_opacity = None
+                    self._fade_in = None
+                    self._fade_out = None
 
             # Fallback path: no animation
             # Add the left navigation widget if not on login page - only add it once so we don't have multiple instances
             # Makes updating the information and handling events much, much easier as the left_nav object is created
             # In the main logic file by defualt
+            try:
+                self.stacked_widget.setGraphicsEffect(None)
+            except Exception:
+                pass
+            self._stack_opacity = None
+            self._fade_in = None
+            self._fade_out = None
             if page_name == "login":
                 self.stacked_widget.setCurrentWidget(self.pages[page_name])
                 # Remove left nav if present
                 first_item = self.main_layout.itemAt(0)
                 if first_item is not None and getattr(first_item, 'widget', None):
                     w = first_item.widget()
-                    if isinstance(w, type(left_nav.leftNav())):
+                    if isinstance(w, left_nav.leftNav):
                         self.main_layout.removeWidget(w)
                         w.setParent(None)
             else:
@@ -165,7 +194,7 @@ class MainWindow(QMainWindow):
                 # Only insert the left navigation if it is not already there based on the name of the leftnav
                 first_item = self.main_layout.itemAt(0)
                 existing_widget = first_item.widget() if first_item and first_item.widget() else None
-                if not isinstance(existing_widget, type(left_nav.leftNav())):
+                if not isinstance(existing_widget, left_nav.leftNav):
                     self.main_layout.insertWidget(0, left_nav.leftNav(event_manager=self.event_manager), 1, alignment=Qt.AlignmentFlag.AlignLeft)
         else:
             logging.error(f"Page '{page_name}' does not exist.")
