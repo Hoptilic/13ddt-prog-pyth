@@ -3,6 +3,7 @@ import os, sys
 import re
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from database.login_manage import LoginDBManager
 
 class Login():
     """
@@ -54,6 +55,40 @@ class Login():
             100000
         )
         return new_key == key
+
+    def change_password(self, username: str, current_password: str, new_password: str, db_manager: LoginDBManager | None = None) -> bool:
+        """
+        Change the password for the given user after verifying the current password and validating the new one.
+        Returns True on success, False on failure (e.g., wrong current password or DB update failure).
+        May raise ValueError for invalid new passwords.
+        """
+        if db_manager is None:
+            db_manager = LoginDBManager()
+
+        # Validate new password strength
+        self.validate(new_password)
+
+        # Fetch current creds
+        salt = db_manager.retrieve_salt(username)
+        key = db_manager.retrieve_key(username)
+        if not salt or not key:
+            return False
+
+        # Verify current password provided
+        if not self.unencrypt(current_password, salt, key):
+            return False
+
+        # Hash and store new password
+        new_salt, new_key = self.encrypt(new_password)
+        return db_manager.update_password(username, new_key, new_salt)
+
+    def delete_account(self, username: str, db_manager: LoginDBManager | None = None) -> bool:
+        """
+        Delete the specified user account. Returns True if deleted, False otherwise.
+        """
+        if db_manager is None:
+            db_manager = LoginDBManager()
+        return db_manager.delete_user(username)
     # def grantCookie(self, cookie_id):
     #     """
     #     Grants a cookie to the user.

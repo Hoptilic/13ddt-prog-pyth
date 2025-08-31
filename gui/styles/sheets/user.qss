@@ -1,0 +1,23 @@
+QWidget {
+    background: transparent;
+}
+
+#rightFrame {
+    border: 2px solid black;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+#userFrame, #securityFrame {
+    border: 2px solid black;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+QLineEdit {
+    min-width: 240px;
+}
+
+QPushButton {
+    min-width: 200px;
+}

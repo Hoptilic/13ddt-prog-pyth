@@ -16,8 +16,9 @@ class AccountWidget(QWidget):
     """
     Widget to display recent submissions.
     """
-    def __init__(self):
+    def __init__(self, event_manager=None):
         super().__init__()
+        self.event_manager = event_manager
 
         self.session_manager = SessionFileManager()
         self.setWindowTitle("Recent Submissions")
@@ -171,8 +172,14 @@ class AccountWidget(QWidget):
         
     def account_settings(self):
         """Handle account settings action"""
-        print("Account Settings clicked")
-        # TODO: Implement settings page
+        # Navigate to the User page via the central event manager
+        if hasattr(self, 'event_manager') and self.event_manager:
+            try:
+                self.event_manager.switch_page.emit("user")
+            except Exception as e:
+                print(f"Failed to switch to user page: {e}")
+        else:
+            print("Account Settings clicked (no event manager bound)")
         
     def logout(self):
         """Handle logout action"""

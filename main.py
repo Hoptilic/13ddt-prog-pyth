@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
             "login": login.LoginPage(event_manager=self.event_manager),
             "newSubmission": newSubmission.NewSubmissionPage(),
             #"submissions": submissions.SubmissionsPage(),
-            "user": user.UserPage()
+            "user": user.UserPage(event_manager=self.event_manager)
         }
 
         # Adds each page at index 1 to make space for the leftnav

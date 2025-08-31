@@ -28,10 +28,10 @@ class leftNav(QWidget):
         self.navFrame.setObjectName("navFrame")
         self.navLayout = QVBoxLayout()
 
-        self.navFrame.setStyleSheet("#navFrame {border: 2px solid black; padding: 10px; border-radius: 10px;}")
+        # Styling handled in QSS
 
-        # Add the account widget at the top
-        self.account_widget = AccountWidget()
+        # Add the account widget at the top (pass event manager for routing)
+        self.account_widget = AccountWidget(event_manager=self.event_manager)
         self.navLayout.addWidget(self.account_widget, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.homeButton = QPushButton("Dashboard")

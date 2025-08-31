@@ -80,3 +80,24 @@ class LoginDBManager():
         self.cursor.execute('SELECT hashed_password FROM users WHERE username = ?', (username,))
         row = self.cursor.fetchone()
         return row[0] if row else None
+
+    def update_password(self, username, new_hashed_password, new_salt):
+        """
+        Updates the stored hashed password and salt for the specified user.
+        Returns True if a row was updated, False otherwise.
+        """
+        self.cursor.execute(
+            'UPDATE users SET hashed_password = ?, salt = ? WHERE username = ?',
+            (new_hashed_password, new_salt, username)
+        )
+        self.connection.commit()
+        return self.cursor.rowcount > 0
+
+    def delete_user(self, username):
+        """
+        Deletes the specified user from the database.
+        Returns True if a row was deleted, False otherwise.
+        """
+        self.cursor.execute('DELETE FROM users WHERE username = ?', (username,))
+        self.connection.commit()
+        return self.cursor.rowcount > 0
