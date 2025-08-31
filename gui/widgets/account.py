@@ -11,6 +11,7 @@ import os, sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from socketing.session import SessionFileManager
+from socketing.cookie import CookieManager
 
 class AccountWidget(QWidget):
     """
@@ -183,8 +184,46 @@ class AccountWidget(QWidget):
         
     def logout(self):
         """Handle logout action"""
-        print("Logout clicked")
-        # TODO: Implement proper logout flow
+        # Close menu for immediate feedback
+        try:
+            self.hide_dropdown()
+        except Exception:
+            pass
+
+        # Load current session
+        try:
+            self.session_manager.loadSession()
+            cookie = self.session_manager.currentCookie
+        except Exception:
+            cookie = None
+
+        # Remove cookie from jar
+        try:
+            cm = CookieManager()
+            cm.createJar()
+            if cookie:
+                cm.rottenCookie(cookie)
+        except Exception as e:
+            print(f"Error clearing cookie: {e}")
+
+        # Clear session file
+        try:
+            self.session_manager.clearSession()
+        except Exception as e:
+            print(f"Error clearing session: {e}")
+
+        # Update UI label
+        try:
+            self.usernameLabel.setText("Not logged in")
+        except Exception:
+            pass
+
+        # Navigate to login page
+        if self.event_manager:
+            try:
+                self.event_manager.switch_page.emit("login")
+            except Exception as e:
+                print(f"Failed to switch to login page on logout: {e}")
 
     def load_qss(self, path, name):
         """
