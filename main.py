@@ -12,9 +12,9 @@ import logging
 # PyQT Imports
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, 
-    QStackedWidget, QWidget, QHBoxLayout
+    QStackedWidget, QWidget, QHBoxLayout, QGraphicsOpacityEffect
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QObject
+from PyQt6.QtCore import Qt, pyqtSignal, QObject, QPropertyAnimation, QEasingCurve
 
 # Local imports
 from gui.pages import *
@@ -66,6 +66,12 @@ class MainWindow(QMainWindow):
         self.stacked_widget = QStackedWidget()
         self.main_layout.insertWidget(1, self.stacked_widget, 3)
         self.setCentralWidget(self.main_frame)
+        # Opacity effect for animated page transitions
+        self._stack_opacity = QGraphicsOpacityEffect(self.stacked_widget)
+        self._stack_opacity.setOpacity(1.0)
+        self.stacked_widget.setGraphicsEffect(self._stack_opacity)
+        self._fade_out = None
+        self._fade_in = None
 
         self.pages = {
             "home": home.HomePage(event_manager=self.event_manager),
@@ -95,6 +101,53 @@ class MainWindow(QMainWindow):
         Switch to the specified page.
         """
         if page_name in self.pages:
+            # Animate fade-out then perform switch and fade-in
+            def perform_switch():
+                # Existing switch logic
+                if page_name == "login":
+                    self.stacked_widget.setCurrentWidget(self.pages[page_name])
+                    # Remove left nav if present
+                    first_item = self.main_layout.itemAt(0)
+                    if first_item is not None and getattr(first_item, 'widget', None):
+                        w = first_item.widget()
+                        if isinstance(w, type(left_nav.leftNav())):
+                            self.main_layout.removeWidget(w)
+                            w.setParent(None)
+                else:
+                    self.stacked_widget.setCurrentWidget(self.pages[page_name])
+                    # Only insert left nav if not present
+                    first_item = self.main_layout.itemAt(0)
+                    existing_widget = first_item.widget() if first_item and first_item.widget() else None
+                    if not isinstance(existing_widget, type(left_nav.leftNav())):
+                        self.main_layout.insertWidget(0, left_nav.leftNav(event_manager=self.event_manager), 1, alignment=Qt.AlignmentFlag.AlignLeft)
+
+            # Setup animations
+            try:
+                # Fade out
+                self._fade_out = QPropertyAnimation(self._stack_opacity, b"opacity")
+                self._fade_out.setDuration(200)
+                self._fade_out.setStartValue(1.0)
+                self._fade_out.setEndValue(0.0)
+                self._fade_out.setEasingCurve(QEasingCurve.Type.InOutQuad)
+
+                # On fade-out finished, switch and fade-in
+                def on_fade_out_finished():
+                    perform_switch()
+                    self._fade_in = QPropertyAnimation(self._stack_opacity, b"opacity")
+                    self._fade_in.setDuration(200)
+                    self._fade_in.setStartValue(0.0)
+                    self._fade_in.setEndValue(1.0)
+                    self._fade_in.setEasingCurve(QEasingCurve.Type.InOutQuad)
+                    self._fade_in.start()
+
+                self._fade_out.finished.connect(on_fade_out_finished)
+                self._fade_out.start()
+                return
+            except Exception:
+                # Fallback to immediate switch on animation issues
+                pass
+
+            # Fallback path: no animation
             # Add the left navigation widget if not on login page - only add it once so we don't have multiple instances
             # Makes updating the information and handling events much, much easier as the left_nav object is created
             # In the main logic file by defualt
@@ -160,8 +213,9 @@ class MainWindow(QMainWindow):
         return False
 
 # Run the app
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-sys.exit(app.exec())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())
 
