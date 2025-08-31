@@ -115,6 +115,12 @@ class LoginFrame(QWidget):
                     self.session_manager.saveSession(username, current_cookie)
                     if self.event_manager:
                         self.event_manager.login_success.emit(username)
+                    # Clear fields on successful login
+                    try:
+                        self.usernameEntry.clear()
+                        self.passwordEntry.clear()
+                    except Exception:
+                        pass
                     QMessageBox.information(self, "Success", "Login successful! Session started.")
                 else:
                     QMessageBox.critical(self, "Error", "Incorrect password.")
@@ -196,6 +202,12 @@ class RegisterFrame(QWidget):
                 salt, key = self.login_manager.encrypt(self.passwordEntry.text())
                 if self.logindb.register_user(username, key, salt):
                     QMessageBox.information(self, "Success", "User registered successfully!")
+                    # Clear fields on successful register
+                    try:
+                        self.usernameEntry.clear()
+                        self.passwordEntry.clear()
+                    except Exception:
+                        pass
                     self.parent.showLoginFrame()
                 else:
                     QMessageBox.critical(self, "Error", "Failed to register user.")
