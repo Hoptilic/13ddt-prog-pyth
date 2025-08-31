@@ -73,7 +73,6 @@ class UserPage(QWidget):
         self.securityFrame.setLayout(self.securityLayout)
 
         # Assemble right side
-        self.rightLayout.addWidget(self.userFrame, alignment=Qt.AlignmentFlag.AlignCenter)
         self.rightLayout.addWidget(self.securityFrame, alignment=Qt.AlignmentFlag.AlignCenter)
         self.rightFrame.setLayout(self.rightLayout)
 

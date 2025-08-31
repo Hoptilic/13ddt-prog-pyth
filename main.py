@@ -20,6 +20,8 @@ from PyQt6.QtCore import Qt, pyqtSignal, QObject
 from gui.pages import *
 from gui.widgets import *
 import gui.widgets as widgets
+from socketing.cookie import CookieManager
+from socketing.session import SessionFileManager
 
 class EventManager(QObject):
     """
@@ -85,7 +87,8 @@ class MainWindow(QMainWindow):
         self.event_manager.switch_page.connect(self.switch_page)
 
         # This behaviour will change as the login page will be skipped if the user is already signed in
-        self.stacked_widget.setCurrentWidget(self.pages["login"])
+        if not self.attempt_auto_login():
+            self.stacked_widget.setCurrentWidget(self.pages["login"])
 
     def switch_page(self, page_name):
         """
@@ -97,11 +100,19 @@ class MainWindow(QMainWindow):
             # In the main logic file by defualt
             if page_name == "login":
                 self.stacked_widget.setCurrentWidget(self.pages[page_name])
-                self.main_layout.removeWidget(self.main_layout.itemAt(0).widget())
+                # Remove left nav if present
+                first_item = self.main_layout.itemAt(0)
+                if first_item is not None and getattr(first_item, 'widget', None):
+                    w = first_item.widget()
+                    if isinstance(w, type(left_nav.leftNav())):
+                        self.main_layout.removeWidget(w)
+                        w.setParent(None)
             else:
                 self.stacked_widget.setCurrentWidget(self.pages[page_name])
                 # Only insert the left navigation if it is not already there based on the name of the leftnav
-                if not isinstance(self.main_layout.itemAt(0).widget(), type(left_nav.leftNav())):
+                first_item = self.main_layout.itemAt(0)
+                existing_widget = first_item.widget() if first_item and first_item.widget() else None
+                if not isinstance(existing_widget, type(left_nav.leftNav())):
                     self.main_layout.insertWidget(0, left_nav.leftNav(event_manager=self.event_manager), 1, alignment=Qt.AlignmentFlag.AlignLeft)
         else:
             logging.error(f"Page '{page_name}' does not exist.")
@@ -124,6 +135,29 @@ class MainWindow(QMainWindow):
         except Exception as e:
             print(f"Error loading QSS file {name}: {str(e)}")
             return ""
+
+    def attempt_auto_login(self) -> bool:
+        """Attempt to auto-login using a saved session and a valid cookie.
+        Returns True on success, else False.
+        """
+        try:
+            session = SessionFileManager()
+            cookie_mgr = CookieManager()
+            cookie_mgr.createJar()
+            username = session.get_current_user_from_session()
+            cookie = session.currentCookie
+            if username and cookie and cookie_mgr.checkCookie(cookie):
+                # Optionally refresh the cookie
+                try:
+                    cookie_mgr.freshenCookie(cookie)
+                except Exception:
+                    pass
+                # Route to home via existing signal wiring
+                self.event_manager.login_success.emit(username)
+                return True
+        except Exception as e:
+            print(f"Auto-login failed: {e}")
+        return False
 
 # Run the app
 app = QApplication(sys.argv)
