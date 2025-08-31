@@ -32,7 +32,7 @@
 
 /* New Submission Button */
 #newSubmissionButton {
-    background-color: #28a745;
+    background-color: #059669;
     color: white;
     border: none;
     padding: 10px 20px;
@@ -41,11 +41,11 @@
 }
 
 #newSubmissionButton:hover {
-    background-color: #218838;
+    background-color: #047857; /* darker on hover */
 }
 
 #newSubmissionButton:pressed {
-    background-color: #1e7e34;
+    background-color: #065f46; /* darkest on press */
 }
 
 /* ---------- RECENT SUBMISSIONS WIDGET ---------- */
@@ -61,11 +61,11 @@
     border: 2px solid black;
     padding: 10px;
     border-radius: 10px;
-    background-color: white;
+    background: transparent;
 }
 
 #mainFrame:hover {
-    background-color: #f8f9fa;
+    background-color: transparent;
     border-color: #007acc;
 }
 

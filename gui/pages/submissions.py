@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QScrollArea
+    QLabel, QPushButton, QScrollArea, QGridLayout, QSizePolicy
 )
 from PyQt6.QtCore import Qt
 
@@ -18,13 +18,14 @@ class SubmissionsPage(QWidget):
         self.session_manager = SessionFileManager()
 
         self.setWindowTitle("NCAI - My Submissions")
-        
+
         self.mainLayout = QHBoxLayout()
-        
+
         # Right side container
         self.rightFrame = QWidget()
         self.rightFrame.setObjectName("rightFrame")
         self.rightLayout = QVBoxLayout()
+        self.rightLayout.setContentsMargins(0, 0, 0, 0)
 
         # Header
         self.title = QLabel("My Submissions")
@@ -43,15 +44,22 @@ class SubmissionsPage(QWidget):
         # Scroll area for submissions
         self.submissionsHandlerFrame = QWidget()
         self.submissionsHandlerFrame.setObjectName("submissionsHandlerFrame")
-        self.submissionsHandlerLayout = QVBoxLayout(self.submissionsHandlerFrame)
+        self.submissionsHandlerLayout = QGridLayout(self.submissionsHandlerFrame)
+        self.submissionsHandlerLayout.setHorizontalSpacing(8)
+        self.submissionsHandlerLayout.setVerticalSpacing(8)
+        self.submissionsHandlerLayout.setContentsMargins(8, 8, 8, 8)
+        self.submissionsHandlerLayout.setColumnStretch(0, 1)
+        self.submissionsHandlerLayout.setColumnStretch(1, 1)
+        self.submissionsHandlerFrame.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         self.scrollArea = QScrollArea()
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setWidget(self.submissionsHandlerFrame)
         self.rightLayout.addWidget(self.scrollArea)
 
         self.rightFrame.setLayout(self.rightLayout)
-        self.mainLayout.addWidget(self.rightFrame, 3, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.mainLayout.addWidget(self.rightFrame, 1)
         self.setLayout(self.mainLayout)
 
         # Wire actions
@@ -72,7 +80,7 @@ class SubmissionsPage(QWidget):
         super().showEvent(event)
 
     def load_submissions(self):
-        # Clear list
+        # Clear grid
         while self.submissionsHandlerLayout.count():
             item = self.submissionsHandlerLayout.takeAt(0)
             w = item.widget()
@@ -96,13 +104,20 @@ class SubmissionsPage(QWidget):
             self.submissionsHandlerLayout.addWidget(QLabel("No submissions yet."), alignment=Qt.AlignmentFlag.AlignCenter)
             return
 
-        for sub in subs:
+        columns = 2
+        for i, sub in enumerate(subs):
             w = RecentSubmissionIndividual(sub)
+            # Make cards taller and responsive in width
+            w.setMinimumHeight(170)
+            w.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
             if self.event_manager:
                 w.submission_clicked.connect(self.event_manager.view_submission.emit)
-            self.submissionsHandlerLayout.addWidget(w, alignment=Qt.AlignmentFlag.AlignCenter)
+            row, col = divmod(i, columns)
+            self.submissionsHandlerLayout.addWidget(w, row, col, alignment=Qt.AlignmentFlag.AlignTop)
 
-        self.submissionsHandlerLayout.addStretch(1)
+        # Add stretch to push items to top
+        last_row = (len(subs) - 1) // columns + 1 if subs else 0
+        self.submissionsHandlerLayout.setRowStretch(last_row, 1)
 
     def load_qss(self, path, name):
         try:

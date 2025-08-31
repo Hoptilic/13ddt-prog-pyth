@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout,
-    QLabel, QPushButton, QTextEdit, QGraphicsDropShadowEffect
+    QLabel, QPushButton, QTextEdit
 )
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -22,7 +22,7 @@ class RecentSubmissionIndividual(QWidget):
 
         self.indLayout = QVBoxLayout()
         self.mainFrame = QWidget()
-        self.mainFrame.setObjectName("submissionCard")
+        self.mainFrame.setObjectName("mainFrame")
 
         if submission_data:
             # Display actual submission data
@@ -64,18 +64,16 @@ class RecentSubmissionIndividual(QWidget):
             self.indLayout.addWidget(self.submissionLabel, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.mainFrame.setLayout(self.indLayout)
-        # Subtle shadow for card depth
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(16)
-        shadow.setOffset(0, 2)
-        shadow.setColor(Qt.GlobalColor.black)
-        self.mainFrame.setGraphicsEffect(shadow)
         self.mainLayout.addWidget(self.mainFrame, alignment=Qt.AlignmentFlag.AlignCenter)
         self.setLayout(self.mainLayout)
-
-        # Enable clicking if we have submission data
+        
+        # Enable clicking if we have submission data (cursor on inner card only)
         if submission_data:
-            self.setCursor(Qt.CursorShape.PointingHandCursor)
+            try:
+                self.mainFrame.setCursor(Qt.CursorShape.PointingHandCursor)
+            except Exception:
+                pass
+
 
         current_dir = os.path.dirname(__file__)
         assets = os.path.join(current_dir, '..', 'styles', 'sheets')
@@ -85,10 +83,15 @@ class RecentSubmissionIndividual(QWidget):
         self.setStyleSheet(page_ss)
     
     def mousePressEvent(self, event):
-        """Handle mouse click to emit submission data."""
-        if event.button() == Qt.MouseButton.LeftButton and self.submission_data:
-            self.submission_clicked.emit(self.submission_data)
-        super().mousePressEvent(event) 
+        """Handle mouse click to emit submission data only when clicking the card frame."""
+        try:
+            if event.button() == Qt.MouseButton.LeftButton and self.submission_data:
+                # Map click to inner frame coordinates; only emit if click is within mainFrame
+                pos_in_frame = self.mainFrame.mapFrom(self, event.position().toPoint())
+                if self.mainFrame.rect().contains(pos_in_frame):
+                    self.submission_clicked.emit(self.submission_data)
+        finally:
+            super().mousePressEvent(event)
 
     def load_qss(self, path, name):
         """
