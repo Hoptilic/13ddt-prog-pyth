@@ -223,6 +223,7 @@ class ExemplarInterpet():
         Returns the list of exemplars.
         """
         return self.exemplarData.get("exemplars", [])
+    
     def getExemplarsByGrade(self, grade):
         """
         Returns a list of exemplars for a specific grade (not achieved, achieved, merit, excellence).
