@@ -1,5 +1,6 @@
 """
-This file handles the login functionality, hashing, verification and the final cookie/session activation.
+This file handles the login functionality.
+incl. hashing, verification and the final cookie/session activation.
 """
 
 import hashlib
