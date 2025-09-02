@@ -1,5 +1,10 @@
+"""
+This file handles the login functionality, hashing, verification and the final cookie/session activation.
+"""
+
 import hashlib
-import os, sys
+import os
+import sys
 import re
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
