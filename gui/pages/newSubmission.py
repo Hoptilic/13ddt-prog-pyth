@@ -304,7 +304,7 @@ class NewSubmissionPage(QWidget):
         self.standardText.setCurrentIndex(-1)
         self.yearText.clear()
         self.ghostText.clear()
-        self.ghostText.setPlaceholderText("This movie, Mad Max, isd irected by...")
+        self.ghostText.setPlaceholderText("This movie, Mad Max, is directed by...")
         self.ghostText.setDisabled(True)
         
         # Reset the size of the text edit to default
