@@ -32,20 +32,38 @@ class FeedbackModule():
         """
         Ensure any <mark> tags and <span title='...'> spans are given yellow background.
         """
+        # Unified style with larger interactive area & inline-block to improve hover reliability
+        # Increased padding and inline-block give a more stable box for the cursor to remain inside.
+        HIGHLIGHT_STYLE = (
+            "background-color: rgba(102,255,204,0.5); "  # 50% opacity mint
+            "padding:3px 3px; "                          # slightly larger than before
+            "border-radius:3px; "
+            "cursor: help; "
+            "display:inline-block; "                     # ensure a proper rectangular hover box
+            "line-height:1.25; "                         # consistent vertical box
+            "transition: background-color 120ms ease-in; "
+        )
 
-        # convert <span title='...'> to styled spans
-        html = re.sub(r'<span\s+title="([^\"]+)"\s*>(.*?)</span>', r"<span style='background-color: rgba(102,255,204,0.5); padding:2px 2px; border-radius:3px; cursor: help;' title='\1'>\2</span>", html, flags=re.DOTALL)
-        # conversion with different use of brackets
-        html = re.sub(r"<span\s+title='([^\']+)'\s*>(.*?)</span>", r"<span style='background-color: rgba(102,255,204,0.5); padding:2px 2px; border-radius:3px; cursor: help;' title='\1'>\2</span>", html, flags=re.DOTALL)
-        # convert <mark> to styled spans
-        html = html.replace('<mark>', "<span style='background-color: rgba(102,255,204,0.5); padding:2px 2px; border-radius:3px; cursor: help;'>").replace('</mark>', '</span>')
-        # add highlight style to spans with title but no existing highlight stuf
+        # Helper to inject/merge style (if a span already has style, we append ours if not present)
+        def _merge_style(match):
+            title_val = match.group(1)
+            inner = match.group(2)
+            return (f"<span title='{title_val}' style=\"{HIGHLIGHT_STYLE}\">{inner}</span>")
+
+        # convert <span title="...">...</span>
+        html = re.sub(r'<span\s+title="([^\"]+)"\s*>(.*?)</span>', _merge_style, html, flags=re.DOTALL)
+        # convert <span title='...'>...</span>
+        html = re.sub(r"<span\s+title='([^']+)'\s*>(.*?)</span>", _merge_style, html, flags=re.DOTALL)
+        # convert <mark>...</mark>
+        html = html.replace('<mark>', f"<span style=\"{HIGHLIGHT_STYLE}\">").replace('</mark>', '</span>')
+
+        # spans with title but no style attribute
         pattern = r'<span((?![^>]*style)[^>]*\btitle="[^"]+"[^>]*)>'
-        repl = r'<span\1 style="background-color: rgba(102,255,204,0.5); padding:2px 2px; border-radius:3px; cursor: help;">'
+        repl = fr'<span\1 style="{HIGHLIGHT_STYLE}">'  # append our style
         html = re.sub(pattern, repl, html)
         # same as above but with single quotes
         pattern_single = r"<span((?![^>]*style)[^>]*\btitle='[^']+'[^>]*)>"
-        repl_single = r"<span\1 style=\"background-color: rgba(102,255,204,0.5); padding:2px 2px; border-radius:3px; cursor: help;\">"
+        repl_single = fr"<span\1 style=\"{HIGHLIGHT_STYLE}\">"
         html = re.sub(pattern_single, repl_single, html)
 
         # We use more than one regex so that we can catch it all because the LLM is not perfect - hopefully this covers all the possibilities
@@ -145,7 +163,7 @@ class FeedbackModule():
         try:
             client = OpenAI(
                 base_url="https://openrouter.ai/api/v1",
-                api_key="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",
+                api_key="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",
             )
 
             response = client.chat.completions.create(

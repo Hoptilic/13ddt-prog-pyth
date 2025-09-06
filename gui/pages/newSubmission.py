@@ -33,6 +33,11 @@ class NewSubmissionPage(QWidget):
 
         self.title = QLabel("Create a new submission")
         self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Grade display label (hidden until a grade is available)
+        self.gradeLabel = QLabel("")
+        self.gradeLabel.setObjectName("gradeLabel")
+        self.gradeLabel.hide()
+        self.rightLayout.addWidget(self.gradeLabel, alignment=Qt.AlignmentFlag.AlignCenter)
         #\
 
         #/ Create handler that will contain the new submission form
@@ -49,24 +54,29 @@ class NewSubmissionPage(QWidget):
         self.yearText.setPlaceholderText("Enter year (e.g., 2024)")
         self.submissionsHandlerLayout.addWidget(self.yearText, alignment=Qt.AlignmentFlag.AlignCenter)
         self.yearText.currentIndexChanged.connect(self.handleYearComboboxChange)
+        # Hide year selection until a standard is chosen
+        self.yearText.hide()
 
         self.ghostText = QTextEdit()
-        self.ghostText.setPlaceholderText("This movie, Mad Max, isd irected by...")
+        self.ghostText.setPlaceholderText("This movie, Mad Max, is directed by...")
         self.ghostText.setDisabled(True)
         self.ghostText.document().documentLayout().documentSizeChanged.connect(self.update_ghostTextSize)
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Hide text input until year chosen
+        self.ghostText.hide()
 
-        # Button layout for sbmut and delete buttons
+        # Button layout for submit and delete buttons
         self.buttonLayout = QHBoxLayout()
-        
         self.submitButton = QPushButton("Submit")
         self.submitButton.clicked.connect(self.handleSubit)
         self.buttonLayout.addWidget(self.submitButton)
+        # Hide submit until text area is shown
+        self.submitButton.hide()
         
         self.deleteButton = QPushButton("Delete Submission")
         self.deleteButton.setObjectName("deleteButton")
         self.deleteButton.clicked.connect(self.handleDelete)
-        self.deleteButton.hide()  # jhhidfe by default
+        self.deleteButton.hide()  # hide by default
         self.buttonLayout.addWidget(self.deleteButton)
         
         self.newSubmissionButton = QPushButton("New Submission")
@@ -76,7 +86,6 @@ class NewSubmissionPage(QWidget):
         self.buttonLayout.addWidget(self.newSubmissionButton)
         
         self.submissionsHandlerLayout.addLayout(self.buttonLayout)
-
         self.submissionsHandlerFrame.setLayout(self.submissionsHandlerLayout)
         #\
 
@@ -84,7 +93,6 @@ class NewSubmissionPage(QWidget):
         self.rightFrame.setLayout(self.rightLayout)
         self.mainLayout.addWidget(self.rightFrame, 3, alignment=Qt.AlignmentFlag.AlignCenter)
         
-
         self.loadAvailableStandards()
         self.setLayout(self.mainLayout)
 
@@ -164,11 +172,19 @@ class NewSubmissionPage(QWidget):
                             result.get('Output', {}).get('Grade') if isinstance(result.get('Output'), dict) else None or
                             result.get('Output', {}).get('grade') if isinstance(result.get('Output'), dict) else None or
                             'Unknown')
+                else:
+                    grade = 'Unknown'
                 
                 if highlighted_html and not highlighted_html.startswith("Error:"):
                     self.ghostText.setHtml(highlighted_html)
                 else:
                     self.ghostText.setPlainText(highlighted_html or "No highlighted HTML available.")
+                # Show grade label
+                self.gradeLabel.setText(f"Estimated Grade: {grade}")
+                self.gradeLabel.show()
+
+                # Replace selectors with static labels for clarity post-submit
+                self.showSubmittedMeta(standard, yearText)
                     
             except Exception as e:
                 self.ghostText.setPlainText(f"Error extracting highlighted HTML: {str(e)}")
@@ -196,6 +212,34 @@ class NewSubmissionPage(QWidget):
         except Exception as ex:
             QMessageBox.critical(self, "Processing Error", str(ex))
 
+    def showSubmittedMeta(self, standard: str, year: str):
+        """Hide the dropdowns and show static labels with the submitted standard/year."""
+        try:
+            # If labels already exist, just update
+            if hasattr(self, 'submittedMetaContainer'):
+                self.standardValueLabel.setText(f"Standard: {standard}")
+                self.yearValueLabel.setText(f"Year: {year}")
+                self.submittedMetaContainer.show()
+            else:
+                self.submittedMetaContainer = QWidget()
+                metaLayout = QHBoxLayout()
+                metaLayout.setContentsMargins(0,0,0,0)
+                metaLayout.setSpacing(12)
+                self.standardValueLabel = QLabel(f"Standard: {standard}")
+                self.yearValueLabel = QLabel(f"Year: {year}")
+                self.standardValueLabel.setObjectName("standardLabelStatic")
+                self.yearValueLabel.setObjectName("yearLabelStatic")
+                metaLayout.addWidget(self.standardValueLabel)
+                metaLayout.addWidget(self.yearValueLabel)
+                self.submittedMetaContainer.setLayout(metaLayout)
+                # Insert above the text edit (after we hid inputs)
+                self.submissionsHandlerLayout.insertWidget( self.submissionsHandlerLayout.indexOf(self.ghostText), self.submittedMetaContainer, alignment=Qt.AlignmentFlag.AlignCenter)
+            # Hide original inputs
+            self.standardText.hide()
+            self.yearText.hide()
+        except Exception as e:
+            print(f"Failed to show submitted meta labels: {e}")
+
     def handleStandardComboboxChange(self):
         selected_standard = self.standardText.currentText()
         print(f"Selected standard: {selected_standard}")
@@ -203,15 +247,32 @@ class NewSubmissionPage(QWidget):
         # Only load years if we have a valid standard selected
         if selected_standard and selected_standard.strip():
             self.loadAvailableYears(selected_standard)
+            self.yearText.show()
+            self.yearText.setCurrentIndex(-1)
+            # Hide downstream inputs until year picked
+            self.ghostText.hide()
+            self.submitButton.hide()
+            self.ghostText.setDisabled(True)
         else:
             # Clear the year dropdown if no valid standard is selected
             self.yearText.clear()
+            self.yearText.hide()
+            self.ghostText.hide()
+            self.submitButton.hide()
 
     def handleYearComboboxChange(self):
         selected_year = self.yearText.currentText()
         print(f"Selected year: {selected_year}")
-
-        self.ghostText.setEnabled(True)
+        if selected_year and selected_year.strip():
+            # Now reveal text area and submit button
+            self.ghostText.setEnabled(True)
+            self.ghostText.show()
+            self.submitButton.show()
+            self.ghostText.setFocus()
+        else:
+            self.ghostText.hide()
+            self.submitButton.hide()
+            self.ghostText.setDisabled(True)
 
     def update_ghostTextSize(self):
         doc_size = self.ghostText.document().size()
@@ -274,6 +335,12 @@ class NewSubmissionPage(QWidget):
             self.ghostText.setHtml(highlighted_html)
         else:
             self.ghostText.setPlainText(submission_data.get('submissionText', ''))
+
+        # Display stored grade if present
+        grade = submission_data.get('grade') or submission_data.get('Grade') or 'Unknown'
+        if grade:
+            self.gradeLabel.setText(f"Estimated Grade: {grade}")
+            self.gradeLabel.show()
         
         self.ghostText.setEnabled(False)  # Make read-only in vwieing mode
         
@@ -295,6 +362,8 @@ class NewSubmissionPage(QWidget):
         
         # Update UI title
         self.title.setText("Create a new submission")
+        self.gradeLabel.hide()
+        self.gradeLabel.clear()
         
         # Temporarily disconnect signals to prevent errors during reset
         self.standardText.currentIndexChanged.disconnect()
@@ -306,6 +375,9 @@ class NewSubmissionPage(QWidget):
         self.ghostText.clear()
         self.ghostText.setPlaceholderText("This movie, Mad Max, is directed by...")
         self.ghostText.setDisabled(True)
+        self.yearText.hide()
+        self.ghostText.hide()
+        self.submitButton.hide()
         
         # Reset the size of the text edit to default
         self.update_ghostTextSize()
