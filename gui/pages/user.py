@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QLineEdit, QMessageBox
+    QLabel, QPushButton, QLineEdit, QMessageBox, QFormLayout, QSizePolicy
 )
 from PyQt6.QtCore import Qt
 import os, sys
@@ -19,71 +19,114 @@ class UserPage(QWidget):
 
         self.setWindowTitle("NCAI - User")
 
-        self.mainLayout = QHBoxLayout()
+        # Root layout (only one main frame; weight adjustments internal)
+        self.mainLayout = QHBoxLayout(self)
+        self.mainLayout.setContentsMargins(24, 16, 24, 16)
+        self.mainLayout.setSpacing(0)
 
-        # Right side container
+        # Content frame
         self.rightFrame = QWidget()
         self.rightFrame.setObjectName("rightFrame")
-        self.rightLayout = QVBoxLayout()
+        self.rightFrame.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        self.rightLayout = QVBoxLayout(self.rightFrame)
+        self.rightLayout.setContentsMargins(12, 12, 12, 12)
+        self.rightLayout.setSpacing(10)
 
-        self.title = QLabel("User")
-        self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Title (small, fixed height)
+        self.title = QLabel("Account Settings")
+        tfont = self.title.font()
+        tfont.setPointSize(12)
+        tfont.setBold(True)
+        self.title.setFont(tfont)
+        self.title.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.title.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
+        self.rightLayout.addWidget(self.title, 0)
 
-        # Security management container
+        # Security section frame (auto-size to contents)
         self.securityFrame = QWidget()
-        self.securityLayout = QVBoxLayout()
         self.securityFrame.setObjectName("securityFrame")
+        self.securityFrame.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Maximum)
+        self.securityLayout = QVBoxLayout(self.securityFrame)
+        self.securityLayout.setContentsMargins(10, 10, 10, 10)
+        self.securityLayout.setSpacing(8)
 
+        # Security header
         self.securityTitle = QLabel("Security Management")
-        self.securityTitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.securityLayout.addWidget(self.securityTitle, alignment=Qt.AlignmentFlag.AlignCenter)
+        sfont = self.securityTitle.font()
+        sfont.setPointSize(10)
+        sfont.setBold(True)
+        self.securityTitle.setFont(sfont)
+        self.securityDesc = QLabel("Update your password or permanently delete your account.")
+        self.securityDesc.setWordWrap(True)
+        dfont = self.securityDesc.font()
+        dfont.setPointSize(8)
+        self.securityDesc.setFont(dfont)
+        self.securityLayout.addWidget(self.securityTitle)
+        self.securityLayout.addWidget(self.securityDesc)
 
-        self.securityDesc = QLabel("Manage your security settings here...")
-        self.securityDesc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.securityLayout.addWidget(self.securityDesc, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Password subheading
+        self.passwordSubtitle = QLabel("Change Password")
+        pfont = self.passwordSubtitle.font()
+        pfont.setPointSize(9)
+        pfont.setBold(True)
+        self.passwordSubtitle.setFont(pfont)
+        self.securityLayout.addWidget(self.passwordSubtitle)
 
-        # Change password inputs
-        self.currentPasswordLabel = QLabel("Current Password")
-        self.securityLayout.addWidget(self.currentPasswordLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        formFrame = QWidget()
+        formLayout = QFormLayout(formFrame)
+        formLayout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        formLayout.setFormAlignment(Qt.AlignmentFlag.AlignLeft)
+        formLayout.setHorizontalSpacing(8)
+        formLayout.setVerticalSpacing(6)
 
         self.currentPasswordInput = QLineEdit()
         self.currentPasswordInput.setEchoMode(QLineEdit.EchoMode.Password)
-        self.securityLayout.addWidget(self.currentPasswordInput, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.newPasswordLabel = QLabel("New Password")
-        self.securityLayout.addWidget(self.newPasswordLabel, alignment=Qt.AlignmentFlag.AlignCenter)
-
         self.newPasswordInput = QLineEdit()
         self.newPasswordInput.setEchoMode(QLineEdit.EchoMode.Password)
-        self.securityLayout.addWidget(self.newPasswordInput, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        self.confirmPasswordLabel = QLabel("Confirm New Password")
-        self.securityLayout.addWidget(self.confirmPasswordLabel, alignment=Qt.AlignmentFlag.AlignCenter)
-
         self.confirmPasswordInput = QLineEdit()
         self.confirmPasswordInput.setEchoMode(QLineEdit.EchoMode.Password)
-        self.securityLayout.addWidget(self.confirmPasswordInput, alignment=Qt.AlignmentFlag.AlignCenter)
 
-        # Action buttons
+        formLayout.addRow(QLabel("Current"), self.currentPasswordInput)
+        formLayout.addRow(QLabel("New"), self.newPasswordInput)
+        formLayout.addRow(QLabel("Confirm"), self.confirmPasswordInput)
+        self.securityLayout.addWidget(formFrame)
+
+        # Change password button centered row
+        btnRow = QHBoxLayout()
+        btnRow.addStretch(1)
         self.changePasswordButton = QPushButton("Change Password")
+        self.changePasswordButton.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        btnRow.addWidget(self.changePasswordButton)
+        btnRow.addStretch(1)
+        self.securityLayout.addLayout(btnRow)
+
+        # Danger zone
+        self.dangerSubtitle = QLabel("Danger Zone")
+        dzfont = self.dangerSubtitle.font()
+        dzfont.setPointSize(9)
+        dzfont.setBold(True)
+        self.dangerSubtitle.setFont(dzfont)
+        self.securityLayout.addWidget(self.dangerSubtitle)
+        self.deleteHelp = QLabel("Deleting your account will remove all submissions. This cannot be undone.")
+        self.deleteHelp.setWordWrap(True)
+        hfont = self.deleteHelp.font()
+        hfont.setPointSize(8)
+        self.deleteHelp.setFont(hfont)
+        self.securityLayout.addWidget(self.deleteHelp)
         self.deleteAccountButton = QPushButton("Delete Account")
-        self.securityLayout.addWidget(self.changePasswordButton, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.securityLayout.addWidget(self.deleteAccountButton, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.deleteAccountButton.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.securityLayout.addWidget(self.deleteAccountButton, 0, Qt.AlignmentFlag.AlignLeft)
 
-        self.securityFrame.setLayout(self.securityLayout)
+        # Add security frame
+        self.rightLayout.addWidget(self.securityFrame, 0)
+        self.rightLayout.addStretch(1)
+        self.mainLayout.addWidget(self.rightFrame, 0, Qt.AlignmentFlag.AlignTop)
 
-        # Assemble right side
-        self.rightLayout.addWidget(self.securityFrame, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.rightFrame.setLayout(self.rightLayout)
-
-        self.mainLayout.addWidget(self.rightFrame, 3, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(self.mainLayout)
-
-        # Connect actions
+        # Connections
         self.changePasswordButton.clicked.connect(self.handle_change_password)
         self.deleteAccountButton.clicked.connect(self.handle_delete_account)
 
-        # Load page-specific stylesheet
+        # Styles
         current_dir = os.path.dirname(__file__)
         assets = os.path.join(current_dir, '..', 'styles', 'sheets')
         page_ss = self.load_qss(os.path.join(assets, 'user.qss'), 'user.qss')
@@ -104,7 +147,6 @@ class UserPage(QWidget):
             QMessageBox.warning(self, "Mismatch", "New password and confirmation do not match.")
             return
 
-        # Delegate to Login service
         try:
             ok = self.login.change_password(username, current, new)
         except ValueError as e:
