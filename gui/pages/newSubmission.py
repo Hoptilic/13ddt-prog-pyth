@@ -16,15 +16,6 @@ import json
 
 
 class NewSubmissionPage(QWidget):
-    """GUI page for creating a new submission or viewing an existing one.
-
-    Responsibilities:
-    - Collect standard + year selection, then user text input.
-    - Run the heavy feedback / grading request in a background thread to keep UI responsive.
-    - Display highlighted HTML + estimated grade and persist submission to the DB.
-    - Allow viewing previously saved submissions in a read‑only state with delete + new submission actions.
-    """
-
     def __init__(self):
         super().__init__()
         # Core state
@@ -38,27 +29,26 @@ class NewSubmissionPage(QWidget):
         self._processingDialog = None
 
         self.setWindowTitle("NCAI - New Submission")
-
-        # Root layout (placeholder for potential future left nav expansion)
+        
         self.mainLayout = QHBoxLayout()
-
-        # Right side container
+        
+        #/ Create the rest of the submissions page - right side
         self.rightFrame = QWidget()
         self.rightFrame.setObjectName("rightFrame")
         self.rightLayout = QVBoxLayout()
 
         self.title = QLabel("Create a new submission")
         self.rightLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
-
-        # Grade label (hidden initially)
+        # Grade display label (hidden until a grade is available)
         self.gradeLabel = QLabel("")
         self.gradeLabel.setObjectName("gradeLabel")
         self.gradeLabel.hide()
         self.rightLayout.addWidget(self.gradeLabel, alignment=Qt.AlignmentFlag.AlignCenter)
+        #\
 
-        # Form container
+        #/ Create handler that will contain the new submission form
         self.submissionsHandlerFrame = QWidget()
-        self.submissionsHandlerLayout = QVBoxLayout()
+        self.submissionsHandlerLayout = QVBoxLayout()   
         self.submissionsHandlerFrame.setObjectName("submissionsHandlerFrame")
 
         self.standardText = QComboBox()
@@ -70,6 +60,7 @@ class NewSubmissionPage(QWidget):
         self.yearText.setPlaceholderText("Enter year (e.g., 2024)")
         self.submissionsHandlerLayout.addWidget(self.yearText, alignment=Qt.AlignmentFlag.AlignCenter)
         self.yearText.currentIndexChanged.connect(self.handleYearComboboxChange)
+        # Hide year selection until a standard is chosen
         self.yearText.hide()
 
         self.ghostText = QTextEdit()
@@ -77,25 +68,27 @@ class NewSubmissionPage(QWidget):
         self.ghostText.setDisabled(True)
         self.ghostText.document().documentLayout().documentSizeChanged.connect(self.update_ghostTextSize)
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
+        # Hide text input until year chosen
         self.ghostText.hide()
 
-        # Buttons
+        # Button layout for submit and delete buttons
         self.buttonLayout = QHBoxLayout()
         self.submitButton = QPushButton("Submit")
         self.submitButton.clicked.connect(self.handleSubit)
         self.buttonLayout.addWidget(self.submitButton)
+        # Hide submit until text area is shown
         self.submitButton.hide()
-
+        
         self.deleteButton = QPushButton("Delete Submission")
         self.deleteButton.setObjectName("deleteButton")
         self.deleteButton.clicked.connect(self.handleDelete)
-        self.deleteButton.hide()
+        self.deleteButton.hide()  # hide by default
         self.buttonLayout.addWidget(self.deleteButton)
-
+        
         self.newSubmissionButton = QPushButton("New Submission")
         self.newSubmissionButton.setObjectName("newSubmissionButton")
         self.newSubmissionButton.clicked.connect(self.resetToNewSubmission)
-        self.newSubmissionButton.hide()
+        self.newSubmissionButton.hide()  # hide default
         self.buttonLayout.addWidget(self.newSubmissionButton)
 
         self.submissionsHandlerLayout.addLayout(self.buttonLayout)
@@ -111,7 +104,9 @@ class NewSubmissionPage(QWidget):
         # Stylesheet
         current_dir = os.path.dirname(__file__)
         assets = os.path.join(current_dir, '..', 'styles', 'sheets')
+
         page_ss = self.load_qss(os.path.join(assets, "submissions.qss"), "submissions.qss")
+
         self.setStyleSheet(page_ss)
 
     def loadAvailableStandards(self):
@@ -161,8 +156,11 @@ class NewSubmissionPage(QWidget):
         msg = QLabel("Processing your submission... This may take a moment.")
         bar = QProgressBar()
         bar.setRange(0, 0)
-        v.addWidget(msg)
-        v.addWidget(bar)
+        # Center contents within the dialog
+        msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        bar.setFixedWidth(320)  # width
+        v.addWidget(msg, alignment=Qt.AlignmentFlag.AlignCenter)
+        v.addWidget(bar, alignment=Qt.AlignmentFlag.AlignCenter)
         dlg.setModal(True)
         self._processingDialog = dlg
         self._worker_thread = QThread()
