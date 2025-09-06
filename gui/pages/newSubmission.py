@@ -156,11 +156,27 @@ class NewSubmissionPage(QWidget):
         msg = QLabel("Processing your submission... This may take a moment.")
         bar = QProgressBar()
         bar.setRange(0, 0)
-        # Center contents within the dialog
+        # Center contents within the dialog using wrapper layouts for consistent centering
         msg.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        bar.setFixedWidth(320)  # width
-        v.addWidget(msg, alignment=Qt.AlignmentFlag.AlignCenter)
-        v.addWidget(bar, alignment=Qt.AlignmentFlag.AlignCenter)
+        v.setContentsMargins(24, 20, 24, 24)
+        bar.setFixedWidth(320)
+        # Message wrapper
+        msgWrap = QWidget()
+        msgHBox = QHBoxLayout(msgWrap)
+        msgHBox.setContentsMargins(0, 0, 0, 0)
+        msgHBox.addStretch(1)
+        msgHBox.addWidget(msg)
+        msgHBox.addStretch(1)
+        v.addWidget(msgWrap)
+        # Progress bar wrapper
+        barWrap = QWidget()
+        barHBox = QHBoxLayout(barWrap)
+        barHBox.setContentsMargins(0, 0, 0, 0)
+        barHBox.addStretch(1)
+        barHBox.addWidget(bar)
+        barHBox.addStretch(1)
+        v.addWidget(barWrap)
+        dlg.setMinimumWidth(420)
         dlg.setModal(True)
         self._processingDialog = dlg
         self._worker_thread = QThread()
