@@ -21,6 +21,11 @@ QPushButton{
     color:#ffffff;
 }
 
+QPushButton:focus, QPushButton:pressed, QPushButton:default {
+    outline: none;
+    border:1px solid #000000; /* keep consistent border */
+}
+
 /* ---------- COMBOBOX ---------- */
 QComboBox{
     min-height:36px;
