@@ -76,6 +76,12 @@ class FeedbackModule():
         """
         highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml') or output_json.get('Output').get('HighlightedHTML') or output_json.get('Output').get('highlightedhtml')
         if highlighted_html:
+            # Replace HTML entities (&quot &apos) with real characters before styling
+            try:
+                highlighted_html = re.sub(r'&quot;', '"', highlighted_html)
+                highlighted_html = re.sub(r'&apos;', "'", highlighted_html)
+            except Exception:
+                pass
             # normalize highlights and feedback spans
             html = self.normalize_highlight(highlighted_html)
             return html
