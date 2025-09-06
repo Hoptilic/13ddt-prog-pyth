@@ -152,10 +152,11 @@ class LLMDatabaseManager:
         """
         Retrieves recent submissions for a specific user.
         """
+        # Normalize username comparison to avoid issues with stray spaces or case differences
         self.cursor.execute('''
             SELECT id, standard, year, submission_text, feedback, highlighted_html, grade, timestamp
             FROM submissions 
-            WHERE username = ? 
+            WHERE TRIM(LOWER(username)) = TRIM(LOWER(?))
             ORDER BY timestamp DESC 
             LIMIT ?
         ''', (username, limit))

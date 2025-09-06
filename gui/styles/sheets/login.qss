@@ -1,0 +1,29 @@
+/* Login Page Styles */
+
+/* Root gradient (shown if widget is top-level or stacked within transparent container) */
+LoginPage, QWidget#LoginPageRoot {
+	background: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1,
+		stop:0 rgba(15,23,42,255),
+		stop:0.5 rgba(30,41,59,255),
+		stop:1 rgba(15,23,42,255));
+}
+
+/* Ensure internal frames are transparent so gradient shows through */
+LoginPage QWidget, 
+LoginFrame, 
+RegisterFrame,
+LoginFrame QWidget, 
+RegisterFrame QWidget {
+	background: transparent;
+}
+
+/* Center stack widget transparent */
+QStackedWidget { background: transparent; }
+
+/* Larger welcome header */
+#welcomeTitle {
+	font-size: 36px;
+	font-weight: 600;
+	color: #ffffff;
+	padding: 12px 24px;
+}

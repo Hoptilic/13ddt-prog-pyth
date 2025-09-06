@@ -29,7 +29,9 @@ class LoginPage(QWidget):
         self.initLayout = QVBoxLayout()
 
         self.title = QLabel("Welcome to NCAI")
-        self.initLayout.addWidget(self.title)
+        self.title.setObjectName("welcomeTitle")
+        self.title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.initLayout.addWidget(self.title, alignment=Qt.AlignmentFlag.AlignCenter)
 
         self.loginMenuButton = QPushButton("Login")
         self.loginMenuButton.clicked.connect(self.showLoginFrame)
@@ -53,6 +55,14 @@ class LoginPage(QWidget):
         self.mainLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.setLayout(self.mainLayout)
+
+        # Load login stylesheet (ensures transparency so parent gradient shows)
+        try:
+            assets = os.path.join(os.path.dirname(__file__), '..', 'styles', 'sheets')
+            with open(os.path.join(assets, 'login.qss'), 'r') as f:
+                self.setStyleSheet(f.read())
+        except Exception:
+            pass
         self.stackedWidget.setCurrentIndex(0)
 
     def showLoginFrame(self):

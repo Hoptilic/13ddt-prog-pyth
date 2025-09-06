@@ -57,4 +57,5 @@ class HomePage(QWidget):
 
 
     def handlePreviousSubmissions(self):
-        pass
+        # Use central page switch mechanism
+        self.event_manager.switch_page.emit("submissions")

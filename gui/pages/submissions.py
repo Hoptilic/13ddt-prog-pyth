@@ -89,7 +89,10 @@ class SubmissionsPage(QWidget):
 
         username = self.session_manager.currentUser
         if not username:
-            self.submissionsHandlerLayout.addWidget(QLabel("Please log in to view your submissions."), alignment=Qt.AlignmentFlag.AlignCenter)
+            label = QLabel("Please log in to view your submissions.")
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            # Place message spanning available columns
+            self.submissionsHandlerLayout.addWidget(label, 0, 0, 1, 2)
             return
 
         try:
@@ -97,11 +100,15 @@ class SubmissionsPage(QWidget):
             subs = db.getUserSubmissions(username, limit=50)
             db.exit()
         except Exception as e:
-            self.submissionsHandlerLayout.addWidget(QLabel(f"Error loading submissions: {e}"), alignment=Qt.AlignmentFlag.AlignCenter)
+            label = QLabel(f"Error loading submissions: {e}")
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.submissionsHandlerLayout.addWidget(label, 0, 0, 1, 2)
             return
 
         if not subs:
-            self.submissionsHandlerLayout.addWidget(QLabel("No submissions yet."), alignment=Qt.AlignmentFlag.AlignCenter)
+            label = QLabel("No submissions yet.")
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.submissionsHandlerLayout.addWidget(label, 0, 0, 1, 2)
             return
 
         columns = 2
