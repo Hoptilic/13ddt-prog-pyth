@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QTextEdit, QComboBox, QMessageBox, QDialog, QProgressBar
+    QLabel, QPushButton, QTextEdit, QTextBrowser, QComboBox, QMessageBox, QDialog, QProgressBar
 )
 from PyQt6.QtCore import Qt, QThread, pyqtSignal, QObject
 
@@ -63,9 +63,14 @@ class NewSubmissionPage(QWidget):
         # Hide year selection until a standard is chosen
         self.yearText.hide()
 
-        self.ghostText = QTextEdit()
+        # Main text area: QTextBrowser (allows rich HTML for feedback) but made editable pre‑submission.
+        self.ghostText = QTextBrowser()
+        self.ghostText.setOpenLinks(False)          # we'll control any link/click handling later
+        self.ghostText.setOpenExternalLinks(False)
+        self.ghostText.setAcceptRichText(False)     # user types plain text; model returns HTML later
         self.ghostText.setPlaceholderText("This movie, Mad Max, is directed by...")
-        self.ghostText.setDisabled(True)
+        self.ghostText.setReadOnly(False)           # make it editable before processing
+        self.ghostText.setDisabled(True)            # stays disabled until a year is chosen
         self.ghostText.document().documentLayout().documentSizeChanged.connect(self.update_ghostTextSize)
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
         # Hide text input until year chosen
@@ -234,6 +239,12 @@ class NewSubmissionPage(QWidget):
                 grade = 'Unknown'
             if highlighted_html and not highlighted_html.startswith("Error:"):
                 self.ghostText.setHtml(highlighted_html)
+                # Make text read-only but still allow selection + tooltips
+                try:
+                    self.ghostText.setReadOnly(True)
+                except Exception:
+                    # fallback to disable if readOnly fails
+                    self.ghostText.setDisabled(True)
             else:
                 self.ghostText.setPlainText(highlighted_html or "No highlighted HTML available.")
             self.gradeLabel.setText(f"Estimated Grade: {grade}")
@@ -383,6 +394,7 @@ class NewSubmissionPage(QWidget):
         self.yearText.clear()
         self.ghostText.clear()
         self.ghostText.setPlaceholderText("This movie, Mad Max, is directed by...")
+        self.ghostText.setReadOnly(False)
         self.ghostText.setDisabled(True)
         self.yearText.hide()
         self.ghostText.hide()
@@ -641,6 +653,7 @@ class _SubmissionWorker(QObject):
         print(f"Selected year: {selected_year}")
         if selected_year and selected_year.strip():
             # Now reveal text area and submit button
+            self.ghostText.setReadOnly(False)
             self.ghostText.setEnabled(True)
             self.ghostText.show()
             self.submitButton.show()
