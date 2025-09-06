@@ -127,6 +127,12 @@ class NewSubmissionPage(QWidget):
 
     def handleSubit(self):
         """Validate inputs then start background processing thread."""
+        # Lazy-refresh the session in case user logged in after this page was constructed.
+        if not self.session_manager.currentUser:
+            try:
+                self.session_manager.loadSession()
+            except Exception:
+                pass
         if not self.session_manager.currentUser:
             QMessageBox.warning(self, "Authentication Error", "Please log in to submit work.")
             return

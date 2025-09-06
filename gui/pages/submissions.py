@@ -86,8 +86,14 @@ class SubmissionsPage(QWidget):
             w = item.widget()
             if w:
                 w.setParent(None)
-
+        # Lazy reload session so a fresh login after page construction is seen
         username = self.session_manager.currentUser
+        if not username:
+            try:
+                self.session_manager.loadSession()
+                username = self.session_manager.currentUser
+            except Exception:
+                pass
         if not username:
             label = QLabel("Please log in to view your submissions.")
             label.setAlignment(Qt.AlignmentFlag.AlignCenter)
