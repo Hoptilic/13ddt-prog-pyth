@@ -32,70 +32,41 @@ class FeedbackModule():
         """
         Ensure any <mark> tags and <span title='...'> spans are given yellow background.
         """
-        # Base highlight style (concise visual + relative for padding layer)
+        # Unified style with larger interactive area & inline-block to improve hover reliability
+        # Increased padding and inline-block give a more stable box for the cursor to remain inside.
         HIGHLIGHT_STYLE = (
-            "background-color: rgba(102,255,204,0.45); "
-            "padding:2px 3px; "
+            "background-color: rgba(102,255,204,0.5); "  # 50% opacity mint
+            "padding:3px 3px; "                          # slightly larger than before
             "border-radius:3px; "
             "cursor: help; "
-            "display:inline-block; "
-            "line-height:1.25; "
-            "position:relative; "
+            "display:inline-block; "                     # ensure a proper rectangular hover box
+            "line-height:1.25; "                         # consistent vertical box
             "transition: background-color 120ms ease-in; "
         )
-        # Extra invisible hover padding to make tooltip activation easier
-        HOVER_PAD_STYLE = (
-            "position:absolute; left:-6px; top:-4px; right:-6px; bottom:-4px; "
-            "background:transparent; z-index:1;"
-        )
 
-        def wrap_span(match):
+        # Helper to inject/merge style (if a span already has style, we append ours if not present)
+        def _merge_style(match):
             title_val = match.group(1)
             inner = match.group(2)
-            return (
-                "<span style='position:relative; display:inline-block;'>"
-                f"<span title='{title_val}' style=\"{HIGHLIGHT_STYLE}\">{inner}</span>"
-                f"<span style=\"{HOVER_PAD_STYLE}\"></span>"
-                "</span>"
-            )
+            return (f"<span title='{title_val}' style=\"{HIGHLIGHT_STYLE}\">{inner}</span>")
 
-        # Replace existing spans with title attr (double + single quotes)
-        html = re.sub(r'<span\s+title="([^\"]+)"\s*>(.*?)</span>', wrap_span, html, flags=re.DOTALL)
-        html = re.sub(r"<span\s+title='([^']+)'\s*>(.*?)</span>", wrap_span, html, flags=re.DOTALL)
+        # convert <span title="...">...</span>
+        html = re.sub(r'<span\s+title="([^\"]+)"\s*>(.*?)</span>', _merge_style, html, flags=re.DOTALL)
+        # convert <span title='...'>...</span>
+        html = re.sub(r"<span\s+title='([^']+)'\s*>(.*?)</span>", _merge_style, html, flags=re.DOTALL)
+        # convert <mark>...</mark>
+        html = html.replace('<mark>', f"<span style=\"{HIGHLIGHT_STYLE}\">").replace('</mark>', '</span>')
 
-        # Convert <mark> tags
-        html = html.replace(
-            '<mark>',
-            f"<span style='position:relative; display:inline-block;'><span style=\"{HIGHLIGHT_STYLE}\">"
-        ).replace(
-            '</mark>',
-            f"</span><span style=\"{HOVER_PAD_STYLE}\"></span></span>"
-        )
-
-        # Spans with title but no style attribute (fallback patterns)
-        # double quotes
+        # spans with title but no style attribute
         pattern = r'<span((?![^>]*style)[^>]*\btitle="[^"]+"[^>]*)>'
-        html = re.sub(
-            pattern,
-            lambda m: (
-                "<span style='position:relative; display:inline-block;'>"
-                f"<span{m.group(1)} style=\"{HIGHLIGHT_STYLE}\"></span>"
-                f"<span style=\"{HOVER_PAD_STYLE}\"></span></span>"
-            ),
-            html
-        )
-        # single quotes
+        repl = fr'<span\1 style="{HIGHLIGHT_STYLE}">'  # append our style
+        html = re.sub(pattern, repl, html)
+        # same as above but with single quotes
         pattern_single = r"<span((?![^>]*style)[^>]*\btitle='[^']+'[^>]*)>"
-        html = re.sub(
-            pattern_single,
-            lambda m: (
-                "<span style='position:relative; display:inline-block;'>"
-                f"<span{m.group(1)} style=\"{HIGHLIGHT_STYLE}\"></span>"
-                f"<span style=\"{HOVER_PAD_STYLE}\"></span></span>"
-            ),
-            html
-        )
+        repl_single = fr"<span\1 style=\"{HIGHLIGHT_STYLE}\">"
+        html = re.sub(pattern_single, repl_single, html)
 
+        # We use more than one regex so that we can catch it all because the LLM is not perfect - hopefully this covers all the possibilities
         return html
     
 
@@ -105,6 +76,9 @@ class FeedbackModule():
         """
         highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml') or output_json.get('Output').get('HighlightedHTML') or output_json.get('Output').get('highlightedhtml')
         if highlighted_html:
+            # Replace placeholder entities (&apos, &quot) with their literal characters before styling
+            # Some model outputs may incorrectly use these entities inside normal prose.
+            highlighted_html = highlighted_html.replace('&apos;', "'").replace('&quot;', '"')
             # normalize highlights and feedback spans
             html = self.normalize_highlight(highlighted_html)
             return html
