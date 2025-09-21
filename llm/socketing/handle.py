@@ -15,7 +15,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from openai import OpenAI, APIError, RateLimitError
 from database import *
 
-
 class FeedbackModule():
     """Fetch exemplars, call LLM, and return structured feedback and highlighted HTML."""
     def __init__(self):
