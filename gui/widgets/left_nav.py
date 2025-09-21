@@ -1,3 +1,6 @@
+"""
+Left navigation rail with account info and recent submissions.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout,
     QLabel, QPushButton

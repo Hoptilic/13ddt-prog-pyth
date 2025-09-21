@@ -1,9 +1,10 @@
+"""
+Login database manager: stores and retrieves users with salted+hashed passwords.
+"""
 import sqlite3
 
 class LoginDBManager():
-    '''
-    A class to manage the login database, including verifying user existence and registration.
-    '''
+    """Manage login DB: registration, verification, retrieve/update/delete creds."""
 
     def __init__(self, db_path="./database/login.db"):
         """

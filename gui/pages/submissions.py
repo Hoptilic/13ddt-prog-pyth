@@ -1,3 +1,6 @@
+"""
+Submissions page: lists user submissions with a refresh button and navigation to new submission.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QScrollArea, QGridLayout, QSizePolicy
@@ -12,6 +15,7 @@ from socketing.session import SessionFileManager
 from gui.widgets.submission_individual import RecentSubmissionIndividual
 
 class SubmissionsPage(QWidget):
+    """Shows a grid of recent user submissions with click-through to details."""
     def __init__(self, event_manager=None):
         super().__init__()
         self.event_manager = event_manager

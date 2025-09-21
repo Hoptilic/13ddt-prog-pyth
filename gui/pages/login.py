@@ -1,3 +1,6 @@
+"""
+Login/Registration UI: wraps login and register forms and routes on success.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QMessageBox,
     QLabel, QPushButton, QLineEdit, QStackedWidget
@@ -13,6 +16,7 @@ from socketing.cookie import CookieManager
 from socketing.session import SessionFileManager
 
 class LoginPage(QWidget):
+    """Top-level page to show init, login, and register frames."""
     def __init__(self, event_manager=None):
         super().__init__()
         self.event_manager = event_manager
@@ -75,6 +79,7 @@ class LoginPage(QWidget):
         self.stackedWidget.setCurrentIndex(0)
 
 class LoginFrame(QWidget):
+    """Login form with username/password and success routing."""
     def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None, logindb = None):
         super().__init__()
         self.parent = parent
@@ -112,6 +117,7 @@ class LoginFrame(QWidget):
         self.setLayout(self.loginLayout)
 
     def login_user(self):
+        """Validate credentials, create cookie, save session, and navigate to home."""
         self.cookie_manager.createJar() # Always create the jar, even if the login fails, so that it atleast exists (part of app init)
 
         username = self.usernameEntry.text()
@@ -162,6 +168,7 @@ class LoginFrame(QWidget):
         #     QMessageBox.critical(self, "Error", "User not found.")
 
 class RegisterFrame(QWidget):
+    """Registration form storing salted+hashed password in login DB."""
     def __init__(self, parent, event_manager=None, login_manager=None, cookie_manager=None, session_manager=None, logindb=None):
         super().__init__()
         self.parent = parent
@@ -199,6 +206,7 @@ class RegisterFrame(QWidget):
         self.setLayout(self.registerLayout)
 
     def register_user(self):
+        """Validate password policy and register new user in DB."""
         self.cookie_manager.createJar() # Always create the jar, even if the login fails, so that it atleast exists (part of app init)
 
         username = self.usernameEntry.text()

@@ -1,9 +1,10 @@
+"""
+Session file manager: reads/writes session.txt for current user and cookie.
+"""
 import os
 
 class SessionFileManager:
-    """
-    Manages only the session.txt file: saving, loading, and clearing the current session (username and cookie).
-    """
+    """Manage session.txt for username+cookie (save/load/clear)."""
     def __init__(self, session_file="session.txt"):
         self.sessionFile = session_file
         self.currentUser = None

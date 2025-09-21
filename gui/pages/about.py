@@ -1,3 +1,6 @@
+"""
+About page: shows a simple knowledgebase/FAQ placeholder.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QTextEdit
@@ -5,6 +8,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt
 
 class AboutPage(QWidget):
+    """Simple About/Knowledgebase page container."""
     def __init__(self):
         super().__init__()
 
@@ -42,6 +46,7 @@ class AboutPage(QWidget):
         self.setLayout(self.mainLayout)
 
 class knowledgeIndividual(QWidget):
+    """Card widget for a single knowledgebase entry."""
     def __init__(self):
         super().__init__()
         self.mainLayout = QVBoxLayout()

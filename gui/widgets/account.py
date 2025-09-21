@@ -1,3 +1,6 @@
+"""
+Account widget: shows current user and a dropdown with profile/settings/logout.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QHBoxLayout,
     QLabel, QVBoxLayout, QPushButton, QMenu, QFrame
@@ -15,7 +18,7 @@ from socketing.cookie import CookieManager
 
 class AccountWidget(QWidget):
     """
-    Widget to display recent submissions.
+    Header account control: shows username, menu, and navigation hooks.
     """
     def __init__(self, event_manager=None):
         super().__init__()

@@ -1,3 +1,6 @@
+"""
+Home page: entry point with actions to start a new submission or view previous ones.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QTextEdit, QLineEdit,
@@ -11,6 +14,7 @@ import os, sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class HomePage(QWidget):
+    """Landing page with navigation buttons to submissions and new submission."""
     def __init__(self, event_manager=None):
         super().__init__()
         self.event_manager = event_manager
@@ -52,10 +56,10 @@ class HomePage(QWidget):
 
 
     def handleSubmit(self):
-        # Submit is now handled on a different page (newSubmission.py) so send the message to main file to swap to this page
+        """Route to New Submission page via central event manager."""
         self.event_manager.newSubmission.emit()
 
 
     def handlePreviousSubmissions(self):
-        # Use central page switch mechanism
+        """Route to Submissions page via central event manager."""
         self.event_manager.switch_page.emit("submissions")

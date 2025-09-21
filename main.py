@@ -1,6 +1,4 @@
-"""
-This is the main entry point for the application.
-"""
+"""App entry point: builds the main window, pages, and routes between them."""
 
 # System imports
 import os
@@ -47,9 +45,7 @@ class EventManager(QObject):
 
 
 class MainWindow(QMainWindow):
-    """
-    Main window of the application.
-    """
+    """Main window: hosts stacked pages and left navigation, handles routing."""
     def __init__(self):
         super().__init__()
         self.setWindowTitle("NCAI")

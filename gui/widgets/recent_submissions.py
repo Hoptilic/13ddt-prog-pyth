@@ -1,3 +1,6 @@
+"""
+Recent submissions widget: displays a small list of a user's latest items.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout,
     QLabel, QPushButton, QScrollArea
@@ -11,9 +14,7 @@ import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 class RecentSubmissions(QWidget):
-    """
-    Widget to display recent submissions from the database.
-    """
+    """Shows a scrolled list of the current user's most recent submissions."""
     submission_clicked = pyqtSignal(dict)  # Emits submission data when clicked
     
     def __init__(self):

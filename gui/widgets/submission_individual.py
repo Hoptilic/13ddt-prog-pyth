@@ -1,3 +1,6 @@
+"""
+Card widget for a single recent submission.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout,
     QLabel, QPushButton, QTextEdit
@@ -7,9 +10,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 import os, sys
 
 class RecentSubmissionIndividual(QWidget):
-    """
-    Widget to display an individual recent submission.
-    """
+    """Compact card view for a single submission with click-through."""
     submission_clicked = pyqtSignal(dict)  # Emits submission data when clicked
     
     def __init__(self, submission_data=None): # setting submission data to none means that we assume that there is no submission data so that it doesnt crash and burn immediately

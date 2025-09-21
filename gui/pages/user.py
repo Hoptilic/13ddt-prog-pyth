@@ -1,3 +1,6 @@
+"""
+User page: account settings for changing password and deleting account.
+"""
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QLineEdit, QMessageBox, QFormLayout, QSizePolicy
@@ -11,6 +14,7 @@ from socketing.login import Login
 
 
 class UserPage(QWidget):
+    """Account and security management UI."""
     def __init__(self, event_manager=None):
         super().__init__()
         self.event_manager = event_manager

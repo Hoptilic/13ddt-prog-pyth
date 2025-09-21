@@ -1,7 +1,4 @@
-"""
-This module is the general handler for the large-language model used to provide estimations and feedback.
-It handles the connection, message sending, and receiving.
-"""
+"""LLM handler: builds prompts, calls the model, parses grade/feedback/HTML, and handles rate limits."""
 
 # Basic imports
 import os
@@ -20,20 +17,12 @@ from database import *
 
 
 class FeedbackModule():
+    """Fetch exemplars, call LLM, and return structured feedback and highlighted HTML."""
     def __init__(self):
-        """
-        This class does a lot of things:
-        1) It retrieves the exemplars from the database
-        2) It sanitizes the exemplars for use in the LLM
-        3) It takes the user input and sends it to the LLM alongside the exemplars
-        4) It receives the feedback from the LLM
-        5) It returns the feedback to the user
-        """
+        pass
 
     def normalize_highlight(self, html: str):
-        """
-        Ensure any <mark> tags and <span title='...'> spans are given yellow background.
-        """
+        """Normalize highlight spans: merge styles and ensure consistent appearance."""
         # Unified style with larger interactive area & inline-block to improve hover reliability
         # Increased padding and inline-block give a more stable box for the cursor to remain inside.
         HIGHLIGHT_STYLE = (
@@ -73,9 +62,7 @@ class FeedbackModule():
     
 
     def returnHighlightedHTML(self, output_json):
-        """
-        Extract HighlightedHTML from top-level JSON - this silly code checks for multiple possible keys because the LLM has variation
-        """
+        """Extract and normalize the HighlightedHTML field from model output JSON."""
         highlighted_html = output_json.get('HighlightedHTML') or output_json.get('highlightedhtml') or output_json.get('Output').get('HighlightedHTML') or output_json.get('Output').get('highlightedhtml')
         if highlighted_html:
             # Replace placeholder entities (&apos, &quot) with their literal characters before styling
@@ -88,9 +75,7 @@ class FeedbackModule():
             return("Error: No HighlightedHTML field found in output.")
 
     def returnGrade(self, output_json):
-        """
-        Extract Grade from the JSON output - checks for multiple possible keys because the LLM has variation
-        """
+        """Extract a Grade value from the model output JSON with tolerant keys."""
         grade = output_json.get('Grade') or output_json.get('grade') or (output_json.get('Output', {}).get('Grade')) or (output_json.get('Output', {}).get('grade'))
         return grade or "Not graded"
         

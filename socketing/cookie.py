@@ -1,11 +1,11 @@
+"""
+Cookie manager: creates, refreshes, verifies, and persists simple cookies in a text file.
+"""
 import os
 import time
 
 class CookieManager():
-    """
-    This class deals with the management of cookies.
-    It includes methods for adding (baking), removing (rotten), checking (best before + validity) and saving.
-    """
+    """Manage simple file-backed cookies: bake, verify, refresh, and delete."""
     def __init__(self):
         self.cookies = {}
 
