@@ -57,7 +57,7 @@ A desktop app that helps students submit writing, sends it to an LLM for feedbac
 
 ```powershell
 # Inside your virtual environment
-pip install PyQt6 openai python-dotenv
+pip install -r requirements.txt
 ```
 
 3) Configure environment variables (create a .env at the project root):
