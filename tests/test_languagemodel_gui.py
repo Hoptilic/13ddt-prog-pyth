@@ -118,9 +118,14 @@ class LLMTestWindow(QMainWindow):
     """)
         # LLM call
         try:
+            import os
+            base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+            api_key = os.getenv("OPENROUTER_API_KEY", "")
+            if not api_key:
+                raise RuntimeError("OPENROUTER_API_KEY not set; add it to .env to run this demo")
             client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key="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",
+                base_url=base_url,
+                api_key=api_key,
             )
             response = client.chat.completions.create(
                 model="deepseek/deepseek-r1:free",

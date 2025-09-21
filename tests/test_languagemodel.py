@@ -155,9 +155,13 @@ def test_standard_with_llm_interpretation():
     
     userInput = input("etner ur work\n")
 
+    import os
+    base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+    api_key = os.getenv("OPENROUTER_API_KEY", "")
+    assert api_key, "OPENROUTER_API_KEY not set; set it in .env to run this test"
     client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key="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",
+        base_url=base_url,
+        api_key=api_key,
     )
 
     system = """You are auto grading a coding assignment. I have provided the following documents: the

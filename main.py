@@ -14,6 +14,13 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, 
     QStackedWidget, QWidget, QHBoxLayout, QGraphicsOpacityEffect
 )
+import os
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    # dotenv is optional; continue if not installed
+    pass
 from PyQt6.QtCore import Qt, pyqtSignal, QObject, QPropertyAnimation, QEasingCurve
 
 # Local imports
