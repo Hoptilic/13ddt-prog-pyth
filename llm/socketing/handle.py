@@ -178,6 +178,7 @@ class FeedbackModule():
             # Automatic handling for HTTP 429 (rate limit)
             max_attempts = 5
             last_exc = None
+            result = None
             for attempt in range(max_attempts):
                 try:
                     response = client.chat.completions.create(
@@ -192,14 +193,19 @@ class FeedbackModule():
                 except RateLimitError as e:
                     last_exc = e
                     if attempt == max_attempts - 1:
-                        raise
-                    # honor Retry-After if available
+                        return([
+                            'We\'re a bit busy right now',
+                            "The grading service is receiving a lot of requests. Please try again in a minute. Your text hasn’t been lost."
+                        ])
+                    # honor Retry-After if available but clamp to a short maximum
                     retry_after = None
                     try:
                         retry_after = int(getattr(getattr(e, 'response', None), 'headers', {}).get('Retry-After', ''))
                     except Exception:
                         retry_after = None
-                    delay = retry_after if retry_after else min(30, 1.5 * (2 ** attempt)) + random.uniform(0, 0.5)
+                    base = 0.6 * (2 ** attempt)  # 0.6s, 1.2s, 2.4s
+                    delay = (retry_after if retry_after is not None else base) + random.uniform(0, 0.3)
+                    delay = max(0.3, min(delay, 5.0))  # clamp between 0.3s and 5s
                     logging.warning(f"Rate limited by API (429). Retrying in {delay:.1f}s... (attempt {attempt+1}/{max_attempts})")
                     time.sleep(delay)
                 except APIError as e:
@@ -207,8 +213,13 @@ class FeedbackModule():
                     if getattr(e, 'status_code', None) == 429:
                         last_exc = e
                         if attempt == max_attempts - 1:
-                            raise
-                        delay = min(30, 1.5 * (2 ** attempt)) + random.uniform(0, 0.5)
+                            return([
+                                'We\'re a bit busy right now',
+                                "The grading service is receiving a lot of requests. Please try again in a minute. Your text hasn’t been lost."
+                            ])
+                        base = 0.6 * (2 ** attempt)
+                        delay = base + random.uniform(0, 0.3)
+                        delay = max(0.3, min(delay, 5.0))
                         logging.warning(f"APIError 429. Retrying in {delay:.1f}s... (attempt {attempt+1}/{max_attempts})")
                         time.sleep(delay)
                     else:
