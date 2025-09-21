@@ -19,7 +19,14 @@ from database import *
 class FeedbackModule():
     """Fetch exemplars, call LLM, and return structured feedback and highlighted HTML."""
     def __init__(self):
-        pass
+        """
+        This class does a lot of things:
+        1) It retrieves the exemplars from the database
+        2) It sanitizes the exemplars for use in the LLM
+        3) It takes the user input and sends it to the LLM alongside the exemplars
+        4) It receives the feedback from the LLM
+        5) It returns the feedback to the user
+        """
 
     def normalize_highlight(self, html: str):
         """Normalize highlight spans: merge styles and ensure consistent appearance."""
