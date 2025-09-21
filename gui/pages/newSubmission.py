@@ -508,7 +508,7 @@ class _SubmissionWorker(QObject):
         # Launch background worker so UI doesn't freeze
         self._startProcessingThread(standard, year, yearText, userInput)
 
-    # ---------------- Threading helpers (minimal intrusion) ---------------- #
+    #  Threading helpers 
     def _startProcessingThread(self, standard, year, yearText, userInput):
         # Safety: prevent duplicate threads
         if self._worker_thread and self._worker_thread.isRunning():
@@ -827,7 +827,7 @@ class _SubmissionWorker(QObject):
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to delete submission: {str(e)}")
 
-# ---------------- Worker class (isolated) ---------------- #
+# Worker class 
 class _SubmissionWorker(QObject):
     finished = pyqtSignal(object)
     error = pyqtSignal(str)

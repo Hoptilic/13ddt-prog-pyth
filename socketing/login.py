@@ -13,8 +13,7 @@ from database.login_manage import LoginDBManager
 
 class Login():
     """
-    This class handles the login functionality.
-    It includes methods for encrypting and decrypting passwords.
+    Validate password strength, derive hashes, verify passwords
     """
     def __init__(self):
         pass

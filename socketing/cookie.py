@@ -3,7 +3,7 @@ import time
 
 class CookieManager():
     """
-    This class handles the management of cookies.
+    This class deals with the management of cookies.
     It includes methods for adding (baking), removing (rotten), checking (best before + validity) and saving.
     """
     def __init__(self):
