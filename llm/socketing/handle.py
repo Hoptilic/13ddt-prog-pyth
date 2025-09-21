@@ -187,7 +187,7 @@ class FeedbackModule():
                     if attempt == max_attempts - 1:
                         return([
                             'We\'re a bit busy right now',
-                            "The grading service is receiving a lot of requests. Please try again in a minute. Your text hasn’t been lost."
+                            "The grading service is receiving a lot of requests. Please try again in a minute. Your text hasn't been lost."
                         ])
                     # honor Retry-After if available but clamp to a short maximum
                     retry_after = None
@@ -207,7 +207,7 @@ class FeedbackModule():
                         if attempt == max_attempts - 1:
                             return([
                                 'We\'re a bit busy right now',
-                                "The grading service is receiving a lot of requests. Please try again in a minute. Your text hasn’t been lost."
+                                "The grading service is receiving a lot of requests. Please try again in a minute. Your text hasn't been lost."
                             ])
                         base = 0.6 * (2 ** attempt)
                         delay = base + random.uniform(0, 0.3)
