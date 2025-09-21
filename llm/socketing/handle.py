@@ -9,11 +9,13 @@ import json
 import sys
 import logging
 import re
+import time
+import random
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Custom imports
-from openai import OpenAI
+from openai import OpenAI, APIError, RateLimitError
 from database import *
 
 
@@ -164,8 +166,8 @@ class FeedbackModule():
     """)
         # LLM call
         try:
-            base_url = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-            api_key = os.getenv("OPENROUTER_API_KEY", "")
+            base_url = os.getenv("OPENROUTER_BASE_URL")
+            api_key = os.getenv("OPENROUTER_API_KEY")
             if not api_key:
                 raise RuntimeError("Missing OPENROUTER_API_KEY in environment (.env)")
             client = OpenAI(
@@ -173,14 +175,44 @@ class FeedbackModule():
                 api_key=api_key,
             )
 
-            response = client.chat.completions.create(
-                model="deepseek/deepseek-r1:free",
-                messages=[
-                    {"role":"system","content":system_msg},
-                    {"role":"user","content":prompt}
-                ]
-            )
-            result = response.choices[0].message.content
+            # Automatic handling for HTTP 429 (rate limit)
+            max_attempts = 5
+            last_exc = None
+            for attempt in range(max_attempts):
+                try:
+                    response = client.chat.completions.create(
+                        model="deepseek/deepseek-r1:free",
+                        messages=[
+                            {"role":"system","content":system_msg},
+                            {"role":"user","content":prompt}
+                        ]
+                    )
+                    result = response.choices[0].message.content
+                    break
+                except RateLimitError as e:
+                    last_exc = e
+                    if attempt == max_attempts - 1:
+                        raise
+                    # honor Retry-After if available
+                    retry_after = None
+                    try:
+                        retry_after = int(getattr(getattr(e, 'response', None), 'headers', {}).get('Retry-After', ''))
+                    except Exception:
+                        retry_after = None
+                    delay = retry_after if retry_after else min(30, 1.5 * (2 ** attempt)) + random.uniform(0, 0.5)
+                    logging.warning(f"Rate limited by API (429). Retrying in {delay:.1f}s... (attempt {attempt+1}/{max_attempts})")
+                    time.sleep(delay)
+                except APIError as e:
+                    # Some APIError include status_code 429 instead of RateLimitError for some weird reason
+                    if getattr(e, 'status_code', None) == 429:
+                        last_exc = e
+                        if attempt == max_attempts - 1:
+                            raise
+                        delay = min(30, 1.5 * (2 ** attempt)) + random.uniform(0, 0.5)
+                        logging.warning(f"APIError 429. Retrying in {delay:.1f}s... (attempt {attempt+1}/{max_attempts})")
+                        time.sleep(delay)
+                    else:
+                        raise
         except Exception as ex:
             return(['LLM Error', str(ex)])
         finally:
