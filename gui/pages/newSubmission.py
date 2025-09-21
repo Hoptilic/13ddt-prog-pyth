@@ -19,6 +19,7 @@ class NewSubmissionPage(QWidget):
     def __init__(self):
         super().__init__()
         # Core state
+        self.MAX_CHARS = 50000
         self.feedback_module = FeedbackModule()
         self.session_manager = SessionFileManager()
         self.current_submission_data = None
@@ -75,6 +76,20 @@ class NewSubmissionPage(QWidget):
         self.submissionsHandlerLayout.addWidget(self.ghostText, alignment=Qt.AlignmentFlag.AlignCenter)
         # Hide text input until year chosen
         self.ghostText.hide()
+
+        # Character counter label under the editor
+        self.charCountLabel = QLabel("0 / 50,000 characters")
+        self.charCountLabel.setObjectName("charCountLabel")
+        self.charCountLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.submissionsHandlerLayout.addWidget(self.charCountLabel)
+        self.charCountLabel.hide()  # hidden until editor is active
+
+        # Update counter as user types; enforce max only when editable/enabled
+        try:
+            self.ghostText.textChanged.connect(self._updateCharCount)
+        except Exception:
+            # QTextBrowser inherits QTextEdit; fallback to document signal just in case
+            self.ghostText.document().contentsChanged.connect(self._updateCharCount)
 
         # Button layout for submit and delete buttons
         self.buttonLayout = QHBoxLayout()
@@ -154,6 +169,10 @@ class NewSubmissionPage(QWidget):
             return
         if not userInput:
             QMessageBox.warning(self, "Input Error", "Please enter student work.")
+            return
+        if len(userInput) > self.MAX_CHARS:
+            over = len(userInput) - self.MAX_CHARS
+            QMessageBox.warning(self, "Input Error", f"Submission is {over:,} characters over the 50,000 limit.")
             return
         self._startProcessingThread(standard, year, yearText, userInput)
 
@@ -247,6 +266,8 @@ class NewSubmissionPage(QWidget):
                     self.ghostText.setDisabled(True)
             else:
                 self.ghostText.setPlainText(highlighted_html or "No highlighted HTML available.")
+            # Hide the character counter in viewing mode
+            self.charCountLabel.hide()
             self.gradeLabel.setText(f"Estimated Grade: {grade}")
             self.gradeLabel.show()
             self.showSubmittedMeta(standard, yearText)
@@ -319,10 +340,13 @@ class NewSubmissionPage(QWidget):
             self.ghostText.show()
             self.submitButton.show()
             self.ghostText.setFocus()
+            self.charCountLabel.show()
+            self._updateCharCount()
         else:
             self.ghostText.hide()
             self.submitButton.hide()
             self.ghostText.setDisabled(True)
+            self.charCountLabel.hide()
 
     def update_ghostTextSize(self):
         """Dynamically resize the text edit to fit content within bounds."""
@@ -377,6 +401,8 @@ class NewSubmissionPage(QWidget):
         self.newSubmissionButton.show()
         self.standardText.setEnabled(False)
         self.yearText.setEnabled(False)
+        # No editing in viewing mode: hide the counter
+        self.charCountLabel.hide()
 
     def resetToNewSubmission(self):
         """Return page to fresh submission state."""
@@ -398,16 +424,47 @@ class NewSubmissionPage(QWidget):
         self.ghostText.setDisabled(True)
         self.yearText.hide()
         self.ghostText.hide()
-        self.submitButton.hide()
-        self.update_ghostTextSize()
-        self.standardText.currentIndexChanged.connect(self.handleStandardComboboxChange)
-        self.yearText.currentIndexChanged.connect(self.handleYearComboboxChange)
-        self.submitButton.show()
-        self.deleteButton.hide()
-        self.newSubmissionButton.hide()
-        self.standardText.setEnabled(True)
-        self.yearText.setEnabled(True)
-        self.loadAvailableStandards()
+        self.charCountLabel.setText("0 / 50,000 characters")
+        self.charCountLabel.hide()
+
+    def _updateCharCount(self):
+        """Update the character count label and enforce MAX_CHARS when editable."""
+        try:
+            text = self.ghostText.toPlainText()
+            length = len(text)
+            # Enforce only when user-editable and enabled (avoid truncating LLM HTML)
+            if not self.ghostText.isReadOnly() and self.ghostText.isEnabled():
+                if length > self.MAX_CHARS:
+                    cursor = self.ghostText.textCursor()
+                    pos = cursor.position()
+                    anchor = cursor.anchor()
+                    # truncate
+                    self.ghostText.blockSignals(True)
+                    self.ghostText.setPlainText(text[: self.MAX_CHARS])
+                    self.ghostText.blockSignals(False)
+                    new_len = self.MAX_CHARS
+                    # restore cursor selection reasonably
+                    new_pos = min(pos, new_len)
+                    new_anchor = min(anchor, new_len)
+                    c = self.ghostText.textCursor()
+                    c.setPosition(new_anchor)
+                    if new_anchor != new_pos:
+                        c.setPosition(new_pos, c.MoveMode.KeepAnchor)
+                    else:
+                        c.setPosition(new_pos)
+                    self.ghostText.setTextCursor(c)
+                    length = new_len
+            # Update label text, show warning style near/at limit
+            self.charCountLabel.setText(f"{length:,} / {self.MAX_CHARS:,} characters")
+            if length >= self.MAX_CHARS:
+                self.charCountLabel.setStyleSheet("color: #b00020;")  # red at limit
+            elif length >= int(self.MAX_CHARS * 0.9):
+                self.charCountLabel.setStyleSheet("color: #cc8f00;")  # amber near limit
+            else:
+                self.charCountLabel.setStyleSheet("")
+        except Exception as e:
+            # Non-fatal; keep UI responsive
+            print(f"Char count update failed: {e}")
 
     def handleDelete(self):
         """Delete currently viewed submission after confirmation."""
